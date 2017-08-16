@@ -2,11 +2,13 @@
   "name": "application-name",
   "version": "0.0.1",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "colors": "^1.1.2",
     "express": "^4.15.3",
     "express-stormpath": "^4.0.0",
     "fs": "0.0.1-security",
     "lodash": "^4.17.4",
+    "node-uuid": "^1.4.8",
     "path": "^0.12.7",
     "winston": "^2.3.1"
   }

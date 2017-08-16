@@ -4,19 +4,6 @@ const colors = require('colors');
 
 colors.enabled = true;
 
-const defaultTransports = new winston.transports.Console({
-    timestamp: true,
-    prettyPrint: true,
-    level: 'debug',
-    colorize: true,
-});
-
-const defaultLogger = new winston.Logger({
-    transports: [defaultTransports],
-    exceptionHandlers: [defaultTransports],
-    colorize: true,
-});
-
 const createLogger = (loggerConfig) => {
     const transports = _.map(loggerConfig.transports, (transportConfig) => {
         const transportOptions = _.extend({
@@ -36,6 +23,5 @@ const createLogger = (loggerConfig) => {
 };
 
 module.exports = {
-    defaultLogger,
     createLogger,
 };

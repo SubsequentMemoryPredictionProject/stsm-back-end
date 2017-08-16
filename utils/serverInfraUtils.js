@@ -4,33 +4,29 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
 const uuid = require('node-uuid');
-const constants = require('constants');
+const http = require('http');
 
-const initServer = (serverName = 'STSM-Service',
-                    httpPort = 80,
-                    sslPort = 443,
-                    controllersPath = path.join(__dirname, 'controllers'),
-                    timeToLeaveLoadBalancer = 1000 * 20,
-                    timeToKillWorker = 1000 * 120,
-                    logger) => {
-
+// initializing server
+const initServer = ({serverName, httpPort, controllersPath, timeToLeaveLoadBalancer, logger}) => {
     const expressConfiguration = () => {
         return new Promise((resolve) => {
             const app = express();
 
+            // body-parser extracts the entire body portion of an incoming request stream and exposes it
+            // on req.body as something easier to interface with.
             app.use(bodyParser.json({}));
 
             app.use((req, res, next) => {
-                req.startTime = new Date();
+                req.startTime = new Date(); // eslint-disable-line no-param-reassign
 
-                req.context = {
+                req.context = { // eslint-disable-line no-param-reassign
                     appName: serverName,
-                    requestId: uuid.v4(),
+                    requestId: uuid.v4(), // Generates a universally unique identifier (UUID)
                     initializer: {
-                        path: req.path,
-                        method: req.method
+                        path: req.path, // Contains the path part of the request URL.
+                        method: req.method, //  GET/ POST/ PUT/ and so on.
                     },
-                    input: {}
+                    input: {},
                 };
 
                 if (!_.isEmpty(req.params)) _.extend(req.context.input, req.params);
@@ -41,11 +37,13 @@ const initServer = (serverName = 'STSM-Service',
             });
 
             app.use((req, res, next) => {
-                let oldWrite = res.write,
+                const oldWrite = res.write,
                     oldEnd = res.end;
-                let chunks = [];
+                const chunks = [];
 
-                res.write = function (chunk) {
+                // todo should be an arrow function?
+                // override the write function to write in chunks
+                res.write = function (chunk) { // eslint-disable-line no-param-reassign
                     chunks.push(chunk);
 
                     oldWrite.apply(res, arguments);
@@ -53,16 +51,19 @@ const initServer = (serverName = 'STSM-Service',
 
                 // must be a function not arrow function due to the use of arguments keyword
                 res.end = function (chunk) {
-                    if (chunk) chunks.push(new Buffer(chunk));
+                    if (chunk) {
+                        chunks.push(new Buffer(chunk));
+                    }
 
                     let body = Buffer.concat(chunks).toString('utf8');
                     if (body.length <= 4000) { // 4K hard limiting on response
                         if (res.get('Content-Type') && res.get('Content-Type').indexOf('application/json') > -1) body = JSON.parse(body);
 
-                        req.context.response = body;
+                        req.context.response = body; // eslint-disable-line no-param-reassign
                     }
-                    req.context.status = res.statusCode;
-                    req.context.rt = (new Date() - req.startTime);
+                    req.context.status = res.statusCode; // eslint-disable-line no-param-reassign
+                    req.context.rt = (new Date() - req.startTime); // eslint-disable-line no-param-reassign
+
                     logger.info('request finished', req.context);
 
                     oldEnd.apply(res, arguments);
@@ -77,66 +78,26 @@ const initServer = (serverName = 'STSM-Service',
 
     const serverLaunch = (app) => {
         return new Promise((resolve) => {
-            const http = require('http'),
-                https = require('https');
-
             const server = http.createServer(app);
-            let sslServer;
-
-            if (useSSL) {
-                sslServer = https.createServer({
-                    key: fs.readFileSync(sslKey),
-                    cert: fs.readFileSync(sslCert),
-                    ca: fs.readFileSync(sslCA),
-                    secureProtocol: 'SSLv23_method',
-                    secureOptions: constants.SSL_OP_NO_SSLv3
-                }, app);
-            }
 
             process.on('SIGINT', () => {
                 logger.info(`-------- ${serverName} - start responding status not ok ------`);
 
-                reportLBStatusNOK = true;
-
-                if (_.isFunction(notificationHandler)) {
-                    notificationHandler({
-                        type: 'exit-load-balancer'
-                    });
-                }
-
                 setTimeout(() => {
                     logger.info(`-------- Stopping ${serverName} Node ------`);
                     logger.info(`stopping pid: ${process.pid} ...`);
-                    sslServer && sslServer.close(() => {
-                        logger.info(process.pid + ' closed SSL incoming connections');
-                    });
                     server.close(() => {
-                        logger.info(process.pid + ' closed HTTP incoming connections');
+                        logger.info(`${process.pid} closed HTTP incoming connections`);
                     });
-
-                    if (_.isFunction(notificationHandler)) {
-                        notificationHandler({
-                            type: 'connection-shutdown'
-                        });
-                    }
-
-                    setTimeout(() => {
-                        logger.info(process.pid + ' worker † ssl RIP');
-                        if (_.isFunction(notificationHandler)) {
-                            notificationHandler({
-                                type: 'die'
-                            });
-                        }
-                        process.exit(0);
-                    }, timeToKillWorker);
                 }, timeToLeaveLoadBalancer);
             });
 
+            // read controllers paths
             _.each(fs.readdirSync(controllersPath), (controller) => {
                 require(path.join(controllersPath, controller))(app);// eslint-disable-line global-require
             });
 
-
+            // error handling
             app.use((err, req, res, next) => {
                 if (res.headersSent) {
                     return next(err);
@@ -149,38 +110,23 @@ const initServer = (serverName = 'STSM-Service',
             });
 
             server.listen(httpPort);
-            sslServer && sslServer.listen(sslPort);
 
             logger.info(`-------- Starting ${serverName} Node ------`);
             logger.info(`Listening on port ${httpPort}`);
             logger.info(`pid: ${process.pid}`);
 
-            app.get('/lb-status', (req, res) => {
-                logger.info('load balancer healthCheck');
-                if (reportLBStatusNOK) {
-                    res.status(500).json({
-                        statusCode: 500,
-                        message: 'NOK'
-                    });
-                } else {
-                    res.json(true);
-                }
-            });
-
             resolve(app);
         });
     };
 
+    // exit handler (SIGINT)
     process.on('exit', (code) => {
-        if (code > 0) {
-            logger.error('Child is about to exit with code:', code);
-        } else {
-            logger.info('Child is about to exit with code:', code);
-        }
+        logger.error('Server is about to exit with code:', code);
     });
 
+    // uncaughtException handler
     process.on('uncaughtException', (err) => {
-        logger.error(`Child had an Uncaught exception\nError: ${err.message}\nStack:${err.stack}`);
+        logger.error(`Server had an Uncaught exception\nError: ${err.message}\nStack:${err.stack}`);
     });
 
     return Promise.resolve()
@@ -192,5 +138,5 @@ const initServer = (serverName = 'STSM-Service',
 };
 
 module.exports = {
-    initServer
+    initServer,
 };
