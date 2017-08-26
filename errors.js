@@ -1,9 +1,21 @@
 module.exports = {
-    // todo - example should be removed
-    // incompleteShauData: (voucherId, mostRecentEventTimestamp) => {
-    //     return {
-    //         message: `Unable to calculate voucher shau data for ${voucherId}, the latest event counted was on ${mostRecentEventTimestamp}`,
-    //         zeekErrorCode: 12005,
-    //     };
-    // },
+    dbConnectionFailure: (err) => {
+        return {
+            message: `DB connection attempt failed ${err}`,
+            errorCode: 100,
+        };
+    },
+    dbConnectionTerminationFailure: (err) => {
+        return {
+            message: `DB disconnection attempt failed ${err}`,
+            errorNumber: 101,
+        };
+    },
+    dbQueryFailure: (err) => {
+        return {
+            message: `DB query attempt failed ${err}`,
+            errorCode: err.code,
+            errorNumber: 102,
+        };
+    },
 };

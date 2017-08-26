@@ -1,8 +1,9 @@
 const {config, logger} = require('./../index').getInitParams();
 
 module.exports = (app) => {
-    app.get('/stsm/test', (req, response) => {
-        console.log(req)
-        response.json({ok: true});
+    // TODO test remove
+    // responds to http get requests to  http://myip:3101/stsm/test
+    app.get('/stsm/test', (req, res) => {
+        res.json({msg: 'ok'});
     });
 };
