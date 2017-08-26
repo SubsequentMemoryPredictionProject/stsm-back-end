@@ -32,6 +32,10 @@ const authenticateUser = (userName, password) => {
     const sqlQuery = `SELECT password FROM users WHERE user_name = '${userName}'`;
     return databaseUtils.executeQuery(sqlQuery)
         .then((response) => {
+            if (_.isEmpty(response)) {
+                logger.info('The user does not exist');
+                return {success: false, reason: 'invalid user'};
+            }
             const dbPassword = _.get(response, '[0].password');
             if (password && password === dbPassword) {
                 logger.info(`The user "${userName}" was authenticated successfully`);
