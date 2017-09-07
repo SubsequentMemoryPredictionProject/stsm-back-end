@@ -5,9 +5,8 @@ const subElectrodeIds = [1, 2, 3];
 
 const electrodeColumns = _.reduce(electrodeIds, (agg, elecId) => {
     _.each(subElectrodeIds, (subElecId) => {
-        const columnName1 = `signal_elec${elecId}_subelec${subElecId}_1`;
-        // const columnName2 = `signal_elec${elecId}_subelec${subElecId}_2`;
-        agg.push(columnName1);
+        const columnName = `signal_elec${elecId}_subelec${subElecId}`;
+        agg.push(columnName);
     }, []);
     return agg;
 }, []);

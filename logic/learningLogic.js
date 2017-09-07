@@ -2,7 +2,7 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 
 const predictionNames = require('../enums/predictionNames');
-// const featureArraysNames = require('../enums/featureArraysNames');
+const featureArraysNames = require('../enums/featureArraysNames');
 const csvUtils = require('./../utils/csvUtils');
 const databaseUtils = require('../utils/databaseUtils');
 
@@ -64,11 +64,10 @@ const getSubjectDataFromRawData = (subjectId) => {
             return Promise.each(electrodeIds, (elecId) => {
                 return Promise.each(subElectrodeIds, (subElecId) => {
                     const sampleFile = `${INPUT_FOLDER}/raw_data/Signal_S${subjectId}_Elec${elecId}_SubElec${subElecId}.csv`;
-                    // const sampleName = `signal_elec${elecId}_subelec${subElecId}`;
+                    const sampleName = `signal_elec${elecId}_subelec${subElecId}`;
                     let wordId = 1;
                     return csvUtils.each(sampleFile, (eegData) => {
-                        //console.log(`${wordId}.${elecId}.${subElecId}`)
-                        _.set(subjectData, `${wordId}.elec${elecId}.sub_elec${subElecId}`, eegData);
+                        _.set(subjectData, `${wordId}.${sampleName}`, eegData);
                         wordId++;
                     });
                 });
@@ -81,25 +80,22 @@ const getSubjectDataFromRawData = (subjectId) => {
 };
 
 const uploadWordData = (subjectId, wordId, wordData) => {
-
     console.log(subjectId, wordId);
-    const electrode = 1;
-    const sub_electrode = 1;
+    console.log('wordData', JSON.stringify(wordData))
 
-    const partialColumnNames = _.values(predictionNames);
+    const partialColumnNames = _.values(predictionNames).concat(featureArraysNames);
+    console.log('partialColumnNames', partialColumnNames)
 
     const valuesString = _.reduce(partialColumnNames, (values, columnName) => {
         return values.concat(`'${_.get(wordData, columnName)}', `);
-    }, `'${subjectId}','1','${wordId}','${electrode}','${sub_electrode}',`); // subject_id,user_id,word_id
+    }, `'${subjectId}','${USER_ID}','${wordId}', `); // subject_id,user_id,word_id
 
-    console.log(wordData['elec1']['sub_elec1'].toString())
-    const exValuesString = valuesString.concat(`'${wordData['elec1']['sub_elec1'].toString()}'`);
-    // const fixedValuesString = exValuesString.slice(0, _.size(exValuesString) - 2);
+    const fixedValuesString = valuesString.slice(0, _.size(valuesString) - 2);
 
-    const columnNames = ['subject_id', 'user_id', 'word_id', 'electrode', 'sub_electrode'].concat(partialColumnNames, ['sample']);
+    const columnNames = ['subject_id', 'user_id', 'word_id'].concat(partialColumnNames);
 
     const query = `INSERT INTO data_set (${columnNames.toString()})
-                    VALUES (${exValuesString})`;
+                    VALUES (${fixedValuesString})`;
     return databaseUtils.executeQuery(query);
 };
 
