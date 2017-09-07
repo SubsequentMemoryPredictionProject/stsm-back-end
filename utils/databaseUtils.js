@@ -1,6 +1,6 @@
 const mysql = require('promise-mysql');
 
-const errors = require('./../errors');
+const errors = require('./../errors/dbErrors');
 const errorUtils = require('./../utils/errorUtils');
 
 let logger;
@@ -31,9 +31,9 @@ const exitHandler = () => {
 
 const executeQuery = (query) => {
     return new Promise((resolve, reject) => {
-        logger.info(`Performing sql query: ${query}`);
-        // TODO fields?
-        connection.query(query, (error, results, fields) => {
+        logger.info(`Performing sql query: ${query.substring(0, 125)}`);
+        console.log(JSON.stringify(query))
+        connection.query(query, (error, results) => {
             if (error) {
                 reject(errorUtils.generate(errors.dbQueryFailure(error)));
             }

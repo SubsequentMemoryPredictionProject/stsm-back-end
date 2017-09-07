@@ -28,6 +28,8 @@ const initServer = ({serverName, httpPort, controllersPath, timeToLeaveLoadBalan
                     },
                     input: {},
                 };
+                res.header("Access-Control-Allow-Origin", "*");
+                // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
                 if (!_.isEmpty(req.params)) _.extend(req.context.input, req.params);
                 if (!_.isEmpty(req.query)) _.extend(req.context.input, req.query);

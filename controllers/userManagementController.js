@@ -1,7 +1,11 @@
 const userManagementLogic = require('../logic/userManagementLogic');
-const {config, logger} = require('./../index').getInitParams();
+const {logger} = require('./../index').getInitParams();
 
 module.exports = (app) => {
+    /* on a put request to /stsm/user_management/create_user
+     // with user and a password the server will create a user
+     // unless it already exists (in this case the response will state failure)
+     */
     app.put('/stsm/user_management/create_user', (req, res) => {
         const userName = req.query.user_name;
         const password = req.query.password;
@@ -22,6 +26,11 @@ module.exports = (app) => {
             });
     });
 
+    /* on a get request to /stsm/user_management/authenticate
+     // with user and a password
+     // the server will check on the db if the user exists and that it is indeed his password
+     // and will report back in its response,
+     */
     app.get('/stsm/user_management/authenticate', (req, res) => {
         const userName = req.query.user_name;
         const password = req.query.password;

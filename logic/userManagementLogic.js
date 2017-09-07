@@ -2,11 +2,9 @@ const moment = require('moment');
 const _ = require('lodash');
 const databaseUtils = require('./../utils/databaseUtils');
 
-let config;
 let logger;
 
 const init = (initParams) => {
-    config = initParams.config;
     logger = initParams.logger;
 };
 
