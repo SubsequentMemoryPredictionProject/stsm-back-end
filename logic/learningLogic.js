@@ -2,7 +2,6 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 
 const predictionNames = require('../enums/predictionNames');
-const featureArraysNames = require('../enums/featureArraysNames');
 const csvUtils = require('./../utils/csvUtils');
 const databaseUtils = require('../utils/databaseUtils');
 
@@ -79,24 +78,42 @@ const getSubjectDataFromRawData = (subjectId) => {
         });
 };
 
-const uploadWordData = (subjectId, wordId, wordData) => {
-    console.log(subjectId, wordId);
-    console.log('wordData', JSON.stringify(wordData))
+const createElectrodeColumnsNames = (eegDataSection) => {
+    const electrodeIds = eegDataSection === 1 ? [1, 2] : [3, 4];
+    const subElectrodeIds = [1, 2, 3];
+    return _.reduce(electrodeIds, (agg, elecId) => {
+        _.each(subElectrodeIds, (subElecId) => {
+            const columnName = `signal_elec${elecId}_subelec${subElecId}`;
+            agg.push(columnName);
+        }, []);
+        return agg;
+    }, []);
+};
 
+const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
+    const featureArraysNames = createElectrodeColumnsNames(sectionNumber);
     const partialColumnNames = _.values(predictionNames).concat(featureArraysNames);
-    console.log('partialColumnNames', partialColumnNames)
-
     const valuesString = _.reduce(partialColumnNames, (values, columnName) => {
         return values.concat(`'${_.get(wordData, columnName)}', `);
-    }, `'${subjectId}','${USER_ID}','${wordId}', `); // subject_id,user_id,word_id
+    }, `'${subjectId}','${USER_ID}','${wordId}', '${sectionNumber}', `); // subject_id,user_id,word_id
 
     const fixedValuesString = valuesString.slice(0, _.size(valuesString) - 2);
 
-    const columnNames = ['subject_id', 'user_id', 'word_id'].concat(partialColumnNames);
-
+    const columnNames = ['subject_id', 'user_id', 'word_id', 'EEG_data_section'].concat(partialColumnNames);
     const query = `INSERT INTO data_set (${columnNames.toString()})
                     VALUES (${fixedValuesString})`;
+    console.log(JSON.stringify(query));
     return databaseUtils.executeQuery(query);
+};
+
+
+const uploadWordData = (subjectId, wordId, wordData) => {
+    console.log(subjectId, wordId);
+
+    return Promise.all([
+        uploadWordDataSection(subjectId, wordId, wordData, 1),
+        uploadWordDataSection(subjectId, wordId, wordData, 2),
+    ]);
 };
 
 const uploadSubjectData = (subjectId) => {

@@ -22,7 +22,7 @@ module.exports = {
         ],
     },
     amazon_rds: {
-        host: 'stsm.czcokqfhjscu.us-east-1.rds.amazonaws.com',
+        host: 'stsmdb.czcokqfhjscu.us-east-1.rds.amazonaws.com',
         user: 'master',
         password: '12345678',
         port: 3306,

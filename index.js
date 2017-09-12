@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 const Promise = require('bluebird');
 const config = require('./config');
