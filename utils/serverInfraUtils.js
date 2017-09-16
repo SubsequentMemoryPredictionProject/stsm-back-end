@@ -66,7 +66,7 @@ const initServer = ({serverName, httpPort, controllersPath, timeToLeaveLoadBalan
                     req.context.status = res.statusCode; // eslint-disable-line no-param-reassign
                     req.context.rt = (new Date() - req.startTime); // eslint-disable-line no-param-reassign
 
-                    logger.info('request finished', req.context);
+                    logger.info('request finished!');
 
                     oldEnd.apply(res, arguments);
                 };

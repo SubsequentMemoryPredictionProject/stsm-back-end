@@ -9,7 +9,7 @@ module.exports = (app) => {
      // from the raw csv files.
      // the EEG signal was pre-processed in advanced using Matlab
      */
-    app.post('/stsm/create_data_set', (req, res) => {
+    app.post('/stsm/learning/create_data_set', (req, res) => {
         const subjectIds = _.range(1, 23);
         const subjectHandler = (subjectId) => learningLogic.uploadSubjectData(subjectId);
 
