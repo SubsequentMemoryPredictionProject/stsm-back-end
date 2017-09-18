@@ -11,7 +11,7 @@ const OUTPUT_FOLDER = '/Users/gal/Projects/stsm-back-end/output/stsmPrediction';
 let numberOfFiles;
 
 module.exports = (app) => {
-    app.post('/stsm/prediction/uploadEegFiles', (req, res) => {
+    app.post('/stsm/prediction/uploadFiles', (req, res) => {
         const form = new formidable.IncomingForm();
         return form.parse(req, (err, fields, files) => {
             const fileArray = _.reduce(files, (array, file, fileName) => {

@@ -4,6 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
 const uuid = require('node-uuid');
+const cors = require('cors');
 const http = require('http');
 
 // initializing server
@@ -15,6 +16,7 @@ const initServer = ({serverName, httpPort, controllersPath, timeToLeaveLoadBalan
             // body-parser extracts the entire body portion of an incoming request stream and exposes it
             // on req.body as something easier to interface with.
             app.use(bodyParser.json({}));
+            app.use(cors());
 
             app.use((req, res, next) => {
                 req.startTime = new Date(); // eslint-disable-line no-param-reassign
@@ -28,8 +30,9 @@ const initServer = ({serverName, httpPort, controllersPath, timeToLeaveLoadBalan
                     },
                     input: {},
                 };
+                res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                res.header("Access-Control-Allow-Methods", "*");
                 res.header("Access-Control-Allow-Origin", "*");
-                // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
                 if (!_.isEmpty(req.params)) _.extend(req.context.input, req.params);
                 if (!_.isEmpty(req.query)) _.extend(req.context.input, req.query);
