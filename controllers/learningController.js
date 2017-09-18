@@ -27,7 +27,8 @@ module.exports = (app) => {
          signal_elec2_subelec3 from data_set WHERE EEG_data_section=1`
 
         return databaseUtils.executeQuery(query)
-            .then(() => {
+            .then((ans) => {
+                const a = ans;
                 console.log('did it!');
                 res.json({msg: 'Did it', success: true});
             }).catch(console.log);
