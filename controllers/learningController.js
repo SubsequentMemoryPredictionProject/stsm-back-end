@@ -1,5 +1,6 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
+const {config} = require('./../index').getInitParams();
 
 const learningLogic = require('../logic/learningLogic');
 const databaseUtils = require('../utils/databaseUtils');
@@ -13,24 +14,25 @@ module.exports = (app) => {
      */
     app.post('/stsm/learning/upload_data_set', (req, res) => {
         const subjectIds = _.range(1, 23);
-        const subjectHandler = (subjectId) => learningLogic.uploadSubjectData(subjectId);
+
+        const validationSetIndexes = [];
+        let i = 0;
+        for (; i < config.validation_set_size; i++) {
+            const subjectId = _.random(1, 23);
+            const wordId = _.random(1, 401);
+            const sampleIndex = [subjectId, wordId];
+            if (!_.includes(validationSetIndexes, sampleIndex)) {
+                validationSetIndexes.push(sampleIndex);
+            } else {
+                i--;
+            }
+        }
+
+        const subjectHandler = (subjectId) => learningLogic.uploadSubjectData(subjectId, validationSetIndexes);
 
         return Promise.each(subjectIds, subjectHandler)
             .then(() => {
                 res.json({msg: 'The data set was loaded to the db', success: true});
             });
-    });
-
-    app.post('/stsm/learning/create_validation_test', (req, res) => {
-        const query = `SELECT signal_elec1_subelec1, signal_elec1_subelec2,
-        signal_elec1_subelec3, signal_elec2_subelec1, signal_elec2_subelec2,
-         signal_elec2_subelec3 from data_set WHERE EEG_data_section=1`
-
-        return databaseUtils.executeQuery(query)
-            .then((ans) => {
-                const a = ans;
-                console.log('did it!');
-                res.json({msg: 'Did it', success: true});
-            }).catch(console.log);
     });
 };

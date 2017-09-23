@@ -106,9 +106,16 @@ const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
     return databaseUtils.executeQuery(query);
 };
 
+const saveValidationData = (subjectId, wordId, wordData, validationData) => {
+    _.set(validationData, `${subjectId}.${wordId}`, wordData);
+};
 
-const uploadWordData = (subjectId, wordId, wordData) => {
+
+const uploadWordData = (subjectId, wordId, wordData, validationSetIndexes, validationData) => {
     console.log(subjectId, wordId);
+    if (_.includes(validationSetIndexes, [subjectId, wordId])) {
+        return saveValidationData(subjectId, wordId, validationData);
+    }
 
     return Promise.all([
         uploadWordDataSection(subjectId, wordId, wordData, 1),
@@ -116,23 +123,19 @@ const uploadWordData = (subjectId, wordId, wordData) => {
     ]);
 };
 
-const uploadSubjectData = (subjectId) => {
+const uploadSubjectData = (subjectId, validationSetIndexes) => {
     const wordsIds = _.range(1, 401);
+    const validationData = {};
 
     return getSubjectDataFromRawData(subjectId)
         .then((subjectData) => {
             return Promise.each(wordsIds, (wordsId) => {
-                return uploadWordData(subjectId, wordsId, subjectData[wordsId]);
+                return uploadWordData(subjectId, wordsId, subjectData[wordsId], validationSetIndexes, validationData);
             });
         });
-};
-
-const createValidationSet = () => {
-
 };
 
 module.exports = {
     init,
     uploadSubjectData,
-    createValidationSet,
 };
