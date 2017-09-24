@@ -40,7 +40,7 @@ module.exports = (app) => {
             .then((response) => {
                 if (response.success) {
                     logger.info(`User ${userName} was authenticated successfully`);
-                    res.json({msg: 'The user and password are valid', success: true});
+                    res.json({msg: 'The user and password are valid', user_id: 1, success: true});
                 } else if (response.reason) {
                     logger.warn(`User ${userName} was not authenticated due to ${response.reason}`);
                     res.json({msg: response.reason, success: false});

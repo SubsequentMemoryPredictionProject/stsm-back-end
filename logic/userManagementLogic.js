@@ -27,7 +27,7 @@ const createNewUser = (userName, password) => {
 };
 
 const authenticateUser = (userName, password) => {
-    const sqlQuery = `SELECT password FROM users WHERE user_name = '${userName}'`;
+    const sqlQuery = `SELECT password, id FROM users WHERE user_name = '${userName}'`;
     return databaseUtils.executeQuery(sqlQuery)
         .then((response) => {
             if (_.isEmpty(response)) {
@@ -35,9 +35,10 @@ const authenticateUser = (userName, password) => {
                 return {success: false, reason: 'invalid user'};
             }
             const dbPassword = _.get(response, '[0].password');
+            const userId = _.get(response, '[0].id');
             if (password && password === dbPassword) {
                 logger.info(`The user "${userName}" was authenticated successfully`);
-                return {success: true};
+                return {success: true, id: userId};
             } else if (password) {
                 logger.warn(`The user "${userName}" was not authenticated successfully due to an invalid password`);
                 return {success: false, reason: 'Invalid password'};
