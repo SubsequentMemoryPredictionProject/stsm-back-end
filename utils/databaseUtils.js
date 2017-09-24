@@ -32,7 +32,6 @@ const exitHandler = () => {
 const executeQuery = (query) => {
     return new Promise((resolve, reject) => {
         logger.info(`Performing sql query: ${query.substring(0, 125)}`);
-        console.log(JSON.stringify(query))
         connection.query(query, (error, results) => {
             if (error) {
                 reject(errorUtils.generate(errors.dbQueryFailure(error)));

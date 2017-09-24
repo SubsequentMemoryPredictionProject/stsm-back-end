@@ -21,7 +21,10 @@ module.exports = {
     failureInWritingToStream: (stream, content) => {
         return {message: `Unable to to write to stream: ${stream}, ${content}`, code: 1005};
     },
+    failureInWriteFile: () => {
+        return {message: 'Unable to to write csv to file', code: 1006};
+    },
     unexpectedError: () => {
-        return {message: 'Unexpected Error, go to the log for more details...', zeekErrorCode: 1006};
+        return {message: 'Unexpected Error, go to the log for more details...', zeekErrorCode: 1007};
     },
 };

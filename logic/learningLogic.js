@@ -102,19 +102,22 @@ const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
     const columnNames = ['subject_id', 'user_id', 'word_id', 'EEG_data_section'].concat(partialColumnNames);
     const query = `INSERT INTO data_set (${columnNames.toString()})
                     VALUES (${fixedValuesString})`;
-    console.log(JSON.stringify(query));
     return databaseUtils.executeQuery(query);
 };
 
 const saveValidationData = (subjectId, wordId, wordData, validationData) => {
-    _.set(validationData, `${subjectId}.${wordId}`, wordData);
+    const clonedWordData = _.cloneDeep(wordData);
+    _.set(clonedWordData, 'user_id', USER_ID);
+    _.set(clonedWordData, 'subject_id', subjectId);
+    _.set(clonedWordData, 'word_id', wordId);
+    validationData.push(clonedWordData);
 };
 
 
 const uploadWordData = (subjectId, wordId, wordData, validationSetIndexes, validationData) => {
     console.log(subjectId, wordId);
-    if (_.includes(validationSetIndexes, [subjectId, wordId])) {
-        return saveValidationData(subjectId, wordId, validationData);
+    if (_.includes(validationSetIndexes, `${subjectId}%${wordId}`)) {
+        return saveValidationData(subjectId, wordId, wordData, validationData);
     }
 
     return Promise.all([
@@ -123,9 +126,8 @@ const uploadWordData = (subjectId, wordId, wordData, validationSetIndexes, valid
     ]);
 };
 
-const uploadSubjectData = (subjectId, validationSetIndexes) => {
+const uploadSubjectData = (subjectId, validationSetIndexes, validationData) => {
     const wordsIds = _.range(1, 401);
-    const validationData = {};
 
     return getSubjectDataFromRawData(subjectId)
         .then((subjectData) => {
@@ -138,4 +140,5 @@ const uploadSubjectData = (subjectId, validationSetIndexes) => {
 module.exports = {
     init,
     uploadSubjectData,
+    createElectrodeColumnsNames,
 };
