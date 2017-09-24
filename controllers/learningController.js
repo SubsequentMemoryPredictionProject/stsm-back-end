@@ -20,7 +20,7 @@ module.exports = (app) => {
      // the EEG signal was pre-processed in advanced using Matlab
      */
     app.post('/stsm/learning/upload_data_set', (req, res) => {
-        const subjectIds = _.range(1, 23);
+        const subjectIds = _.range(1, 2);
 
         const validationSetIndexes = [];
         let i = 0;
@@ -63,6 +63,7 @@ module.exports = (app) => {
                 ]);
             })
             .then(() => {
+                console.log('done!')
                 res.json({msg: 'The data set was loaded to the db', success: true});
             });
     });
