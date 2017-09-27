@@ -1,7 +1,7 @@
 const Promise = require('bluebird');
 const fs = require('fs');
 const _ = require('lodash');
-const {config} = require('./../index').getInitParams();
+const {config, logger} = require('./../index').getInitParams();
 
 const learningLogic = require('../logic/learningLogic');
 const csvUtils = require('../utils/csvUtils');
@@ -40,7 +40,7 @@ module.exports = (app) => {
 
         return Promise.each(subjectIds, subjectHandler)
             .then(() => {
-                console.log('gal-1')
+                logger.info('gal-1') // todo
 
                 const predictionCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(featureArraysNames.electrodeColumnsNames);
                 const validationCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(_.values(predictionNames), featureArraysNames.electrodeColumnsNames);
@@ -54,7 +54,7 @@ module.exports = (app) => {
                 const predictionPath = `${config.output_folder}/predictionSet.csv`;
                 const validationPath = `${config.output_folder}/validationSet.csv`;
 
-                console.log('gal0')
+                logger.info('gal0') // todo
 
                 const errorHandler = (err) => {
                     if (err) {
@@ -62,7 +62,7 @@ module.exports = (app) => {
                     }
                 };
 
-                console.log('gal1')
+                logger.info('gal1') // todo
 
                 return Promise.all([
                     fs.writeFile(predictionPath, predictionCsv, errorHandler),
@@ -73,6 +73,10 @@ module.exports = (app) => {
                 console.log('gal2')
 
                 res.json({msg: 'The data set was loaded to the db', success: true});
-            });
+            })
+            .catch((err) => { // todo delete
+                logger.info(err);
+                throw (err);
+            })
     });
 };
