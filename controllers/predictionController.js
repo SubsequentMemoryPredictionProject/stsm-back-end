@@ -6,7 +6,6 @@ const {config, logger} = require('./../index').getInitParams();
 
 const sampleIdNames = require('../enums/sampleIdNames');
 const featureArraysNames = require('../enums/featureArraysNames');
-const predictionNames = require('../enums/predictionNames');
 const csvUtils = require('../utils/csvUtils');
 const errorUtils = require('../utils/errorUtils');
 const databaseUtils = require('../utils/databaseUtils');
@@ -16,7 +15,6 @@ module.exports = (app) => {
     app.post('/stsm/prediction/uploadFiles', (req, res) => {
         const form = new formidable.IncomingForm();
         const userId = req.query.user_id;
-        console.log('userId', userId);
         return Promise.resolve()
             .then(() => {
                 return form.parse(req, (err, fields, files) => {
@@ -30,20 +28,21 @@ module.exports = (app) => {
                         return array;
                     }, []);
 
-                    console.log('fileArray', typeof fileArray);
+                    console.log('fileArray', fileArray);
 
                     // TODO ERROR IN CASE OF MORE THAN ONE FILE
                     const subjectsWords = {};
                     const columnNamesForSection1 = ['EEG_data_section'].concat(_.values(sampleIdNames), featureArraysNames.section1ElectrodeColumnsNames);
-                    const partialColumnNamesForSection1 = ['EEG_data_section'].concat(_.values(sampleIdNames).slice(1), featureArraysNames.section1ElectrodeColumnsNames);
+                    const partialColumnNamesForSection1 = (_.values(sampleIdNames).slice(1)).concat(featureArraysNames.section1ElectrodeColumnsNames);
                     const columnNamesForSection2 = ['EEG_data_section'].concat(_.values(sampleIdNames), featureArraysNames.section2ElectrodeColumnsNames);
-                    const partialColumnNamesForSection2 = ['EEG_data_section'].concat(_.values(sampleIdNames).slice(1), featureArraysNames.section2ElectrodeColumnsNames);
+                    const partialColumnNamesForSection2 = (_.values(sampleIdNames).slice(1)).concat(featureArraysNames.section2ElectrodeColumnsNames);
 
-                    console.log('partialColumnNamesForSection1', partialColumnNamesForSection1)
+                    console.log('partialColumnNamesForSection1', partialColumnNamesForSection1);
                     const uploadSampleSection = (sample, eegDataSection) => {
                         const columnNames = eegDataSection === 1 ? columnNamesForSection1 : columnNamesForSection2;
                         const partialColumnNames = eegDataSection === 2 ? partialColumnNamesForSection1 : partialColumnNamesForSection2;
 
+                        console.log('partialColumnNames', _.size(partialColumnNames), partialColumnNames);
                         const valuesString = _.reduce(partialColumnNames, (values, columnName, columnIndex) => {
                             const currIndex = eegDataSection === 2 && columnIndex > 2 ? columnIndex + 6 : columnIndex;
                             const currValuesString = values.concat(`'${sample[currIndex]}', `);
@@ -88,31 +87,28 @@ module.exports = (app) => {
                     return Promise.each(fileArray, (file) => {
                         logger.info(`A file named ${file.name} was uploaded by the front-end`);
                         return csvUtils.each(file.path, sampleHandler);
+                    }).then(() => {
+                        res.json({msg: `${_.size(fileArray)} file were uploaded`, success: true});
+                        return request({
+                            method: 'POST',
+                            uri: `http://${config.algorithms_server.ip}/stsm/algorithms/predict/`,
+                            body: {subjectsWords, user_id: userId},
+                            json: true, // Automatically parses the JSON string in the response
+                        });
                     });
                 });
-            })
-            .then(() => {
-                // numberOfFiles = _.size(fileArray);
-                //
-                // return Promise.each(fileArray, (file) => {
-                //     console.log(file.name);
-                // return csvUtils.each(fileArray[0].path, console.log);
-                // });
             });
-        //
-        //     // return request({
-        //     //     uri: 'http://54.86.164.123:3100/test',
-        //     //     json: true, // Automatically parses the JSON string in the response
-        //     // });
-        // }).then((resp) => {
-        //     res.json({msg: `${numberOfFiles} file were uploaded`, success: true});
-        // }).catch((err) => {
-        //     throw errorUtils.generate(httpErrors.predictionProcessFailure(err));
-        // });
+            // .then(() => {
+            //     then((resp) => {
+            //     }).catch((err) => { // TODO
+            //         throw errorUtils.generate(httpErrors.predictionProcessFailure(err));
+            //     });
+            // });
     });
 
     app.get('/stsm/prediction/getResults', (req, res) => {
         res.sendFile(`${config.output_folder}/results.csv`);
+        res.json({msg: `Results.csv was sent`, success: true});
     });
 };
 
