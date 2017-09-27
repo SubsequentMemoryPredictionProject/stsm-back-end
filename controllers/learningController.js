@@ -57,12 +57,16 @@ module.exports = (app) => {
                     }
                 };
 
+                console.log('gal1')
+
                 return Promise.all([
                     fs.writeFile(predictionPath, predictionCsv, errorHandler),
                     fs.writeFile(validationPath, validationCsv, errorHandler),
                 ]);
             })
             .then(() => {
+                console.log('gal2')
+
                 res.json({msg: 'The data set was loaded to the db', success: true});
             });
     });
