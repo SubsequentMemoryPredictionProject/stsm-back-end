@@ -20,5 +20,3 @@ module.exports = {
     section2ElectrodeColumnsNames,
     electrodeColumnsNames: section1ElectrodeColumnsNames.concat(section2ElectrodeColumnsNames),
 };
-
-

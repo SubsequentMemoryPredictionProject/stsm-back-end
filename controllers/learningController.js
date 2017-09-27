@@ -20,7 +20,7 @@ module.exports = (app) => {
      // the EEG signal was pre-processed in advanced using Matlab
      */
     app.post('/stsm/learning/upload_data_set', (req, res) => {
-        const subjectIds = _.range(1, 23);
+        const subjectIds = _.range(1, 2); //todo 23
 
         const validationSetIndexes = [];
         let i = 0;
@@ -40,8 +40,11 @@ module.exports = (app) => {
 
         return Promise.each(subjectIds, subjectHandler)
             .then(() => {
-                const predictionCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(featureArraysNames);
-                const validationCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(_.values(predictionNames), featureArraysNames);
+                console.log('gal-1')
+
+                const predictionCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(featureArraysNames.electrodeColumnsNames);
+                const validationCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(_.values(predictionNames), featureArraysNames.electrodeColumnsNames);
+
                 return Promise.all([
                     csvUtils.convertJsonToCsv(predictionCsvFieldNames, {items: validationData}),
                     csvUtils.convertJsonToCsv(validationCsvFieldNames, {items: validationData}),
@@ -50,6 +53,8 @@ module.exports = (app) => {
             .then(([predictionCsv, validationCsv]) => {
                 const predictionPath = `${config.output_folder}/predictionSet.csv`;
                 const validationPath = `${config.output_folder}/validationSet.csv`;
+
+                console.log('gal0')
 
                 const errorHandler = (err) => {
                     if (err) {
