@@ -59,12 +59,17 @@ const each = (filePath, itemHandler) => {
     return new Promise((resolve, reject) => {
         fastCsv.fromPath(filePath, {ignoreEmpty: true})
             .on('data', (item) => {
+                console.log('data')
                 itemHandler(item);
             })
             .on('end', () => {
+                console.log('end')
+
                 return resolve();
             })
-            .on('error', (err) => {
+            .on('error', (err) => { //TODO ADD error handling
+                console.log('error')
+
                 return reject(err);
             });
     });

@@ -9,7 +9,7 @@ module.exports = {
             {
                 type: 'File',
                 options: {
-                    filename: 'logs/algo_research.log',
+                    filename: 'logs/stsm-back-end.log',
                     maxsize: 1048576 * 100, // 100mb
                     colorize: true,
                     timestamp: true,

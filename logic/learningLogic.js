@@ -2,6 +2,8 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 
 const predictionNames = require('../enums/predictionNames');
+const featureArraysNames = require('../enums/featureArraysNames');
+
 const csvUtils = require('./../utils/csvUtils');
 const databaseUtils = require('../utils/databaseUtils');
 
@@ -78,21 +80,9 @@ const getSubjectDataFromRawData = (subjectId) => {
         });
 };
 
-const createElectrodeColumnsNames = (eegDataSection) => {
-    const electrodeIds = eegDataSection === 1 ? [1, 2] : [3, 4];
-    const subElectrodeIds = [1, 2, 3];
-    return _.reduce(electrodeIds, (agg, elecId) => {
-        _.each(subElectrodeIds, (subElecId) => {
-            const columnName = `signal_elec${elecId}_subelec${subElecId}`;
-            agg.push(columnName);
-        }, []);
-        return agg;
-    }, []);
-};
-
 const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
-    const featureArraysNames = createElectrodeColumnsNames(sectionNumber);
-    const partialColumnNames = _.values(predictionNames).concat(featureArraysNames);
+    const featureNames = featureArraysNames[`section${sectionNumber}ElectrodeColumnsNames`]
+    const partialColumnNames = _.values(predictionNames).concat(featureNames);
     const valuesString = _.reduce(partialColumnNames, (values, columnName) => {
         return values.concat(`'${_.get(wordData, columnName)}', `);
     }, `'${subjectId}','${USER_ID}','${wordId}', '${sectionNumber}', `); // subject_id,user_id,word_id
@@ -140,5 +130,4 @@ const uploadSubjectData = (subjectId, validationSetIndexes, validationData) => {
 module.exports = {
     init,
     uploadSubjectData,
-    createElectrodeColumnsNames,
 };
