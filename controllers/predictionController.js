@@ -54,10 +54,12 @@ module.exports = (app) => {
                         console.log('valuesString', valuesString);
                         console.log('fixedValuesString', fixedValuesString);
 
+                        logger.info('gal');
+
                         const query = `INSERT INTO user_data (${columnNames.toString()})
                     VALUES (${fixedValuesString})`;
 
-                        console.log('query', query);
+                        logger.info('query', query);
 
                         return databaseUtils.executeQuery(query);
                     };
