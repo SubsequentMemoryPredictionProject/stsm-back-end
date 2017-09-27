@@ -28,7 +28,7 @@ module.exports = {
         port: 3306,
         database: 'STSMDB',
     },
-    validation_set_size: 10, // todo 1760,
+    validation_set_size: 1760,
     projectPath: __dirname,
     output_folder: `${__dirname}/output/prediction`,
 };
