@@ -87,20 +87,22 @@ module.exports = (app) => {
                             const columnNames = _.values(predictionNames);
 
                             const queryAndPart = _.reduce(subjectsWords, (ANDString, wordArray, subjectId) => {
-                                return `${ANDString} (subject_id = subjectId, word_id in ${ANDString})`;
+                                console.log('subjectId', subjectId);
+                                console.log('wordArray', wordArray);
+
+                                return `${ANDString} (subject_id = subjectId, word_id in ${wordArray}) OR`;
                             }, '');
 
                             const predictionQuery = `SELECT ${columnNames.toString()}
                             FROM untagged_predictions
                             WHERE user_id=${userId}
-                            AND ${queryAndPart}`;
+                            AND ${queryAndPart.slice(-3)}`;
 
                             // TODO
                             logger.info(predictionQuery);
 
                             // return databaseUtils.executeQuery(predictionQuery);
                         }).then(() => {
-                            res.json({msg: 'Prediction process was successfully over', success: true});
                             res.sendFile(`${config.output_folder}/results.csv`);
                         });
                 });
