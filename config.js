@@ -1,5 +1,5 @@
 module.exports = {
-    httpPort: 3102,
+    httpPort: 3101,
     logger: {
         transports: [
             {
