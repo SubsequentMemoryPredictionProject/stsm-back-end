@@ -96,7 +96,7 @@ module.exports = (app) => {
                             const predictionQuery = `SELECT ${columnNames.toString()}
                             FROM untagged_predictions
                             WHERE user_id=${userId}
-                            AND ${queryAndPart.slice(-3)}`;
+                            AND ${queryAndPart.slice(0, -3)}`;
 
                             // TODO
                             logger.info(predictionQuery);
