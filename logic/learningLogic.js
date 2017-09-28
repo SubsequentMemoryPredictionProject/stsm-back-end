@@ -90,7 +90,7 @@ const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
     const fixedValuesString = valuesString.slice(0, _.size(valuesString) - 2);
 
     const columnNames = ['subject_id', 'user_id', 'word_id', 'EEG_data_section'].concat(partialColumnNames);
-    const query = `INSERT INTO full_data_set (${columnNames.toString()})
+    const query = `INSERT INTO data_set (${columnNames.toString()})
                     VALUES (${fixedValuesString})`;
     return databaseUtils.executeQuery(query);
 };
