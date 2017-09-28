@@ -96,9 +96,9 @@ module.exports = (app) => {
                             AND ${queryAndPart}`;
 
                             // TODO
-                            logger.info(JSON.stringify(predictionQuery));
+                            logger.info(predictionQuery);
 
-                            return databaseUtils.executeQuery(predictionQuery);
+                            // return databaseUtils.executeQuery(predictionQuery);
                         }).then(() => {
                             res.sendFile(`${config.output_folder}/results.csv`);
                             res.json({msg: 'Prediction process was successfully over', success: true});
