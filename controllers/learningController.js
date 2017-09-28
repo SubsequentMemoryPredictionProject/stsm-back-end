@@ -12,7 +12,6 @@ const sampleIdNames = require('../enums/sampleIdNames');
 
 const csvErrors = require('../errors/csvErrors');
 
-
 module.exports = (app) => {
     /* on a post request to /stsm/create_data_set
      // the server will extract a data set (training & testing)
@@ -34,6 +33,7 @@ module.exports = (app) => {
                 i--;
             }
         }
+
         logger.info(_.size(validationSetIndexes))
 
         const validationData = [];
@@ -78,6 +78,6 @@ module.exports = (app) => {
             .catch((err) => { // todo delete
                 logger.info(err);
                 throw (err);
-            })
+            });
     });
 };

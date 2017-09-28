@@ -6,6 +6,8 @@ const {config, logger} = require('./../index').getInitParams();
 
 const sampleIdNames = require('../enums/sampleIdNames');
 const featureArraysNames = require('../enums/featureArraysNames');
+const predictionNames = require('../enums/predictionNames');
+
 const csvUtils = require('../utils/csvUtils');
 const errorUtils = require('../utils/errorUtils');
 const databaseUtils = require('../utils/databaseUtils');
@@ -28,8 +30,6 @@ module.exports = (app) => {
                         return array;
                     }, []);
 
-                    console.log('fileArray', fileArray);
-
                     // TODO ERROR IN CASE OF MORE THAN ONE FILE
                     const subjectsWords = {};
                     const columnNamesForSection1 = ['EEG_data_section'].concat(_.values(sampleIdNames), featureArraysNames.section1ElectrodeColumnsNames);
@@ -37,29 +37,18 @@ module.exports = (app) => {
                     const columnNamesForSection2 = ['EEG_data_section'].concat(_.values(sampleIdNames), featureArraysNames.section2ElectrodeColumnsNames);
                     const partialColumnNamesForSection2 = (_.values(sampleIdNames).slice(1)).concat(featureArraysNames.section2ElectrodeColumnsNames);
 
-                    console.log('partialColumnNamesForSection1', partialColumnNamesForSection1);
                     const uploadSampleSection = (sample, eegDataSection) => {
                         const columnNames = eegDataSection === 1 ? columnNamesForSection1 : columnNamesForSection2;
                         const partialColumnNames = eegDataSection === 2 ? partialColumnNamesForSection1 : partialColumnNamesForSection2;
-
-                        console.log('partialColumnNames', _.size(partialColumnNames), partialColumnNames);
                         const valuesString = _.reduce(partialColumnNames, (values, columnName, columnIndex) => {
                             const currIndex = eegDataSection === 2 && columnIndex > 2 ? columnIndex + 6 : columnIndex;
                             const currValuesString = values.concat(`'${sample[currIndex]}', `);
                             return currValuesString;
                         }, `'${eegDataSection}', '${userId}', `); // subject_id,user_id,word_id
-
                         const fixedValuesString = valuesString.slice(0, _.size(valuesString) - 2);
-
-                        console.log('valuesString', valuesString);
-                        console.log('fixedValuesString', fixedValuesString);
-
-                        logger.info('gal');
 
                         const query = `INSERT INTO user_data (${columnNames.toString()})
                     VALUES (${fixedValuesString})`;
-
-                        logger.info('query', query);
 
                         return databaseUtils.executeQuery(query);
                     };
@@ -90,27 +79,41 @@ module.exports = (app) => {
                         logger.info(`A file named ${file.name} was uploaded by the front-end`);
                         return csvUtils.each(file.path, sampleHandler);
                     }).then(() => {
-                        res.json({msg: `${_.size(fileArray)} file were uploaded`, success: true});
                         return request({
                             method: 'POST',
                             uri: `http://${config.algorithms_server.ip}/stsm/algorithms/predict/`,
                             body: {subjectsWords, user_id: userId},
                             json: true, // Automatically parses the JSON string in the response
                         });
+                    }).then((parsedBody) => {
+                        if (parsedBody.success === 'false') {
+                            // TODO handel error
+                        }
+                        console.log(subjectsWords)
+                        const columnNames = _.values(predictionNames);
+
+                        const andClause = _.reduce(subjectsWords, (wordArray, subjectId) => {
+
+                        }, '');
+
+                        const predictionQuery = `SELECT ${columnNames.toString()}
+                            FROM untagged_predictions
+                            WHERE user_id=${userId}
+                            AND ${andClause}`;
+
+                        return databaseUtils.executeQuery(query);
+                    }).then(() => {
+                        res.sendFile(`${config.output_folder}/results.csv`);
+                        res.json({msg: 'Prediction process was successfully over', success: true});
                     });
                 });
             });
-            // .then(() => {
-            //     then((resp) => {
-            //     }).catch((err) => { // TODO
-            //         throw errorUtils.generate(httpErrors.predictionProcessFailure(err));
-            //     });
-            // });
-    });
-
-    app.get('/stsm/prediction/getResults', (req, res) => {
-        res.sendFile(`${config.output_folder}/results.csv`);
-        res.json({msg: `Results.csv was sent`, success: true});
+        // .then(() => {
+        //     then((resp) => {
+        //     }).catch((err) => { // TODO
+        //         throw errorUtils.generate(httpErrors.predictionProcessFailure(err));
+        //     });
+        // });
     });
 };
 
