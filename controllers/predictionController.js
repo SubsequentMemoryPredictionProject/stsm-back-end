@@ -100,8 +100,8 @@ module.exports = (app) => {
 
                             // return databaseUtils.executeQuery(predictionQuery);
                         }).then(() => {
-                            res.sendFile(`${config.output_folder}/results.csv`);
                             res.json({msg: 'Prediction process was successfully over', success: true});
+                            res.sendFile(`${config.output_folder}/results.csv`);
                         });
                 });
             });
