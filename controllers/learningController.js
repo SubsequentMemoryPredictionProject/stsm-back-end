@@ -34,6 +34,7 @@ module.exports = (app) => {
                 i--;
             }
         }
+        logger.info(_.size(validationSetIndexes))
 
         const validationData = [];
         const subjectHandler = (subjectId) => learningLogic.uploadSubjectData(subjectId, validationSetIndexes, validationData);
