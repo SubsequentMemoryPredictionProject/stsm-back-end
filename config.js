@@ -31,7 +31,7 @@ module.exports = {
     algorithms_server: {
         ip: '54.86.164.123:3100',
     },
-    validation_set_size: 1760,
+    validation_set_size: 8800, // 1760,
     projectPath: __dirname,
     output_folder: `${__dirname}/output/prediction`,
 };
