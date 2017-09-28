@@ -72,7 +72,6 @@ module.exports = (app) => {
             })
             .then(() => {
                 console.log('gal2')
-
                 res.json({msg: 'The data set was loaded to the db', success: true});
             })
             .catch((err) => { // todo delete

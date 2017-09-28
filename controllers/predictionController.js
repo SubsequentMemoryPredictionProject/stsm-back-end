@@ -78,34 +78,31 @@ module.exports = (app) => {
                     return Promise.each(fileArray, (file) => {
                         logger.info(`A file named ${file.name} was uploaded by the front-end`);
                         return csvUtils.each(file.path, sampleHandler);
-                    }).then(() => {
-                        return request({
-                            method: 'POST',
-                            uri: `http://${config.algorithms_server.ip}/stsm/algorithms/predict/`,
-                            body: {subjectsWords, user_id: userId},
-                            json: true, // Automatically parses the JSON string in the response
-                        });
-                    }).then((parsedBody) => {
-                        if (parsedBody.success === 'false') {
-                            // TODO handel error
-                        }
-                        console.log(subjectsWords)
-                        const columnNames = _.values(predictionNames);
+                    })
+                        .then((parsedBody) => {
+                            // if (parsedBody.success === 'false') {
+                            //     // TODO handel error
+                            // }
+                            console.log(subjectsWords)
+                            const columnNames = _.values(predictionNames);
 
-                        const andClause = _.reduce(subjectsWords, (wordArray, subjectId) => {
+                            const queryAndPart = _.reduce(subjectsWords, (ANDString, wordArray, subjectId) => {
+                                return `${ANDString} (subject_id = subjectId, word_id in ${ANDString})`;
+                            }, '');
 
-                        }, '');
-
-                        const predictionQuery = `SELECT ${columnNames.toString()}
+                            const predictionQuery = `SELECT ${columnNames.toString()}
                             FROM untagged_predictions
                             WHERE user_id=${userId}
-                            AND ${andClause}`;
+                            AND ${queryAndPart}`;
 
-                        return databaseUtils.executeQuery(query);
-                    }).then(() => {
-                        res.sendFile(`${config.output_folder}/results.csv`);
-                        res.json({msg: 'Prediction process was successfully over', success: true});
-                    });
+                            // TODO
+                            logger.info(JSON.stringify(predictionQuery));
+
+                            return databaseUtils.executeQuery(predictionQuery);
+                        }).then(() => {
+                            res.sendFile(`${config.output_folder}/results.csv`);
+                            res.json({msg: 'Prediction process was successfully over', success: true});
+                        });
                 });
             });
         // .then(() => {
@@ -116,4 +113,3 @@ module.exports = (app) => {
         // });
     });
 };
-
