@@ -3,17 +3,14 @@ const Promise = require('bluebird');
 
 const predictionNames = require('../enums/predictionNames');
 const featureArraysNames = require('../enums/featureArraysNames');
-
 const csvUtils = require('./../utils/csvUtils');
 const databaseUtils = require('../utils/databaseUtils');
 
-const INPUT_FOLDER = './input';
-const USER_ID = 1; // noam brezis userId (the researcher)
-
-let logger;
+let logger, config;
 
 const init = (initParams) => {
     logger = initParams.logger;
+    config = initParams.config;
 };
 
 const getSubjectDataFromRawData = (subjectId) => {
@@ -23,7 +20,7 @@ const getSubjectDataFromRawData = (subjectId) => {
 
     return Promise.resolve()
         .then(() => {
-            const confidenceFile = `${INPUT_FOLDER}/raw_data/Confidence_S${subjectId}.csv`;
+            const confidenceFile = `${config.paths.input_folder}/raw_data/Confidence_S${subjectId}.csv`;
             let wordId = 1;
             return csvUtils.each(confidenceFile, (wordConfidenceData) => {
                 _.set(subjectData, `${wordId}.${predictionNames.STM_confidence_level}`, wordConfidenceData[0]);
@@ -85,7 +82,7 @@ const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
     const partialColumnNames = _.values(predictionNames).concat(featureNames);
     const valuesString = _.reduce(partialColumnNames, (values, columnName) => {
         return values.concat(`'${_.get(wordData, columnName)}', `);
-    }, `'${subjectId}','${USER_ID}','${wordId}', '${sectionNumber}', `); // subject_id,user_id,word_id
+    }, `'${subjectId}','${config.primary_user_id}','${wordId}', '${sectionNumber}', `); // subject_id,user_id,word_id
 
     const fixedValuesString = valuesString.slice(0, _.size(valuesString) - 2);
 
@@ -95,6 +92,7 @@ const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
     return databaseUtils.executeQuery(query);
 };
 
+// TODO features should be strings '3.444, -6.777' and not arrays of strings
 const saveValidationData = (subjectId, wordId, wordData, validationData) => {
     const clonedWordData = _.cloneDeep(wordData);
     _.set(clonedWordData, 'user_id', USER_ID);
@@ -102,7 +100,6 @@ const saveValidationData = (subjectId, wordId, wordData, validationData) => {
     _.set(clonedWordData, 'word_id', wordId);
     validationData.push(clonedWordData);
 };
-
 
 const uploadWordData = (subjectId, wordId, wordData, validationSetIndexes, validationData) => {
     console.log(subjectId, wordId);

@@ -22,7 +22,7 @@ const init = (initParams) => {
 };
 
 const exitHandler = () => {
-    logger.info('Terminating the database connection gracefully');
+    logger.info('Closing the database connection gracefully');
 
     return connection.end((err) => {
         throw errorUtils.generate(errors.dbConnectionTerminationFailure(err));
@@ -32,6 +32,7 @@ const exitHandler = () => {
 const executeQuery = (query) => {
     return new Promise((resolve, reject) => {
         logger.info(`Performing sql query: ${query.substring(0, 125)}`);
+
         connection.query(query, (error, results) => {
             if (error) {
                 reject(errorUtils.generate(errors.dbQueryFailure(error)));

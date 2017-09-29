@@ -90,7 +90,7 @@ module.exports = (app) => {
                                 console.log('subjectId', subjectId);
                                 console.log('wordArray', wordArray);
 
-                                return `${ANDString} (subject_id = subjectId, word_id in ${wordArray}) OR`;
+                                return `${ANDString} (subject_id = subjectId, word_id in [${wordArray})] OR`;
                             }, '');
 
                             const predictionQuery = `SELECT ${columnNames.toString()}
@@ -103,7 +103,7 @@ module.exports = (app) => {
 
                             // return databaseUtils.executeQuery(predictionQuery);
                         }).then(() => {
-                            res.sendFile(`${config.output_folder}/results.csv`);
+                            res.sendFile(`${config.paths.output_folder}/results.csv`);
                         });
                 });
             });

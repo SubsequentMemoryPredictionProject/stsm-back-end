@@ -1,4 +1,3 @@
-// An array of the names of the prediction the model will give
 module.exports = {
     STM: 'stm', // 'will the subject remember the word after a few minutes',
     STM_confidence_level: 'stm_confidence_level', // 'what will be the subject\'s confidence_level in his response',

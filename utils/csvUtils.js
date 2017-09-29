@@ -1,6 +1,7 @@
-const os = require('os'); // to get the correct EOL char
+const os = require('os'); // to get the os's EOL char
 const json2csv = require('json2csv');
 const fastCsv = require('fast-csv');
+
 const errors = require('../utils/errorUtils');
 const csvErrors = require('../errors/csvErrors');
 
@@ -64,7 +65,7 @@ const each = (filePath, itemHandler) => {
             .on('end', () => {
                 return resolve();
             })
-            .on('error', (err) => { //TODO ADD error handling
+            .on('error', (err) => {
                 return reject(err);
             });
     });

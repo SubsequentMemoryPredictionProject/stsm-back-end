@@ -1,5 +1,7 @@
 module.exports = {
-    httpPort: 3101,
+    server: {
+        port: 3101,
+    },
     logger: {
         transports: [
             {
@@ -29,9 +31,13 @@ module.exports = {
         database: 'STSMDB',
     },
     algorithms_server: {
-        ip: '54.86.164.123:3100',
+        ip: '54.86.164.123',
+        port: 3100,
     },
-    validation_set_size: 0, // 1760,
-    projectPath: __dirname,
-    output_folder: `${__dirname}/output/prediction`,
+    paths: {
+        output_folder: `${__dirname}/output/prediction`,
+        input_folder: `${__dirname}/output/prediction`,
+    },
+    validation_set_size: 1760,
+    primary_user_id: 1, // The user id of the main researcher, Mr. Noam Brazis
 };

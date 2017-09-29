@@ -1,7 +1,6 @@
-'use strict';
-
 const path = require('path');
 const Promise = require('bluebird');
+
 const config = require('./config');
 const serverInfrastructure = require('./utils/serverInfraUtils');
 const loggerUtils = require('./utils/loggerUtils');
@@ -11,7 +10,7 @@ const learningLogic = require('./logic/learningLogic');
 
 let logger;
 
-// in case of exit, close the connection to the database
+// Before exit make sure to close the connection to the DB
 process.on('SIGINT', () => {
     return databaseUtils.exitHandler();
 });
@@ -20,7 +19,6 @@ process.on('exit', () => {
     return databaseUtils.exitHandler();
 });
 
-// Main function
 (() => {
     logger = loggerUtils.createLogger(config.logger);
 
@@ -31,7 +29,7 @@ process.on('exit', () => {
     ]).then(() => {
         return serverInfrastructure.initServer({
             serverName: 'STSM-Server',
-            httpPort: config.httpPort,
+            httpPort: config.server.port,
             controllersPath: path.join(__dirname, 'controllers'),
             timeToLeaveLoadBalancer: 1000 * 20,
             logger,

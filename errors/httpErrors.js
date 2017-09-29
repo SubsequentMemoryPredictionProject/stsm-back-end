@@ -1,7 +1,7 @@
 module.exports = {
     formParsingFailure: (err) => {
         return {
-            message: `"Formidable" failed to pars the request's form ${err}`,
+            message: `Formidable package failed to pars the request's form ${err}`,
             errorCode: 3000,
         };
     },

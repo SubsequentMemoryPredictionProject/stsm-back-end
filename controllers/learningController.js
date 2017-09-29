@@ -52,8 +52,8 @@ module.exports = (app) => {
                 ]);
             })
             .then(([predictionCsv, validationCsv]) => {
-                const predictionPath = `${config.output_folder}/predictionSet.csv`;
-                const validationPath = `${config.output_folder}/validationSet.csv`;
+                const predictionPath = `${config.paths.output_folder}/predictionSet.csv`;
+                const validationPath = `${config.paths.output_folder}/validationSet.csv`;
 
                 logger.info('gal0') // todo
 
