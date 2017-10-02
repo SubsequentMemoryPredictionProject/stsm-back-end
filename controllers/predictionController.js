@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
 const formidable = require('formidable');
-const request = require('request-promise');
+const request = require('request');
 
 const predictionNames = require('../enums/predictionNames');
 const predictionLogic = require('../logic/predictionLogic');
@@ -13,7 +13,7 @@ const httpErrors = require('../errors/httpErrors');
 const {config, logger} = require('./../index').getInitParams();
 
 module.exports = (app) => {
-    app.post('/stsm/prediction/uploadFiles', (req, res) => {
+    app.post('/stsm/predict', (req, res) => {
         const userId = req.query.user_id;
         const form = new formidable.IncomingForm();
         const subjectsAndWordIdsForPrediction = {};
@@ -62,8 +62,9 @@ module.exports = (app) => {
                     json: true, // Automatically parses the JSON string in the response
                 };
 
-                return request.put(requestOptions, (error, response, body) => {
+                return request(requestOptions, (error, response, body) => {
                     if (error) {
+                        console.log('gal', error)
                         throw errorUtils.generate(httpErrors.algorithmsServerConnectionFailure());
                     }
                     const responseBody = JSON.parse(body);
@@ -74,7 +75,9 @@ module.exports = (app) => {
 
                     return body;
                 });
-            }).then(() => {
+
+            }).then((resp) => {
+                console.log('gal', JSON.stringify(resp))
                 const columnNames = _.values(predictionNames);
                 const subjectHandler = (queryANDString, subjectWords, subjectId) => {
                     return `${queryANDString} 
