@@ -91,7 +91,7 @@ const getSubjectDataFromRawData = (subjectId) => {
 const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
     const featureNames = featureArraysNames[`section${sectionNumber}ElectrodeColumnsNames`];
     const partialColumnNames = _.values(predictionNames).concat(featureNames);
-    const columnNames = sampleIdNames.concat(['EEG_data_section'], partialColumnNames);
+    const columnNames = _.values(sampleIdNames).concat(['EEG_data_section'], partialColumnNames);
 
     const valuesString = _.reduce(partialColumnNames, (values, columnName) => {
         return values.concat(`'${_.get(wordData, columnName)}', `);
@@ -105,23 +105,31 @@ const uploadWordDataSection = (subjectId, wordId, wordData, sectionNumber) => {
     return databaseUtils.executeQuery(query);
 };
 
-// TODO features should be strings '3.444, -6.777' and not arrays of strings
 const saveValidationData = (subjectId, wordId, wordData, validationData) => {
-    const clonedWordData = _.cloneDeep(wordData);
-    _.set(clonedWordData, 'user_id', config.primary_user_id);
-    _.set(clonedWordData, 'subject_id', subjectId);
-    _.set(clonedWordData, 'word_id', wordId);
-    validationData.push(clonedWordData);
+    logger.info(`Saving the data regarding subject: ${subjectId} and word: ${wordId} to the validation set`);
 
-    console.log('gal', JSON.stringify(clonedWordData));
+    const clonedWordData = _.cloneDeep(wordData);
+
+    const convertArraysToStrings = (agg, electrodeData, electrodeIndex) => {
+        agg[electrodeIndex] = electrodeData.toString(); // eslint-disable-line no-param-reassign
+        return agg;
+    };
+
+    const processedWordData = _.reduce(clonedWordData, convertArraysToStrings, {});
+
+    _.set(processedWordData, 'user_id', config.primary_user_id);
+    _.set(processedWordData, 'subject_id', subjectId);
+    _.set(processedWordData, 'word_id', wordId);
+
+    validationData.push(processedWordData);
 };
 
 const uploadWordData = (subjectId, wordId, wordData, validationSetIndexes, validationData) => {
-    logger.info(`Uploading the data regarding subject: ${subjectId} and word: ${wordId} to the DB`);
-
     if (_.includes(validationSetIndexes, `${subjectId}%${wordId}`)) {
         return saveValidationData(subjectId, wordId, wordData, validationData);
     }
+
+    logger.info(`Uploading the data regarding subject: ${subjectId} and word: ${wordId} to the DB`);
 
     // Each sample is saved in two rows due to row max size limit
     return Promise.all([
@@ -131,7 +139,7 @@ const uploadWordData = (subjectId, wordId, wordData, validationSetIndexes, valid
 };
 
 const uploadSubjectData = (subjectId, validationSetIndexes, validationData) => {
-    const wordsIds = _.range(1, 401);
+    const wordsIds = _.range(1, config.words_per_subject + 1);
 
     return getSubjectDataFromRawData(subjectId)
         .then((subjectData) => {

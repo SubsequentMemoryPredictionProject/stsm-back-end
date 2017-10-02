@@ -36,8 +36,10 @@ module.exports = {
     },
     paths: {
         output_folder: `${__dirname}/output/prediction`,
-        input_folder: `${__dirname}/output/prediction`,
+        input_folder: `${__dirname}/input`,
     },
     validation_set_size: 1760,
     primary_user_id: 1, // The user id of the main researcher, Mr. Noam Brazis
+    subjects_count: 22,
+    words_per_subject: 400,
 };

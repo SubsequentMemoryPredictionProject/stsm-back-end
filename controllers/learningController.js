@@ -12,23 +12,23 @@ const csvErrors = require('../errors/csvErrors');
 
 const {config, logger} = require('./../index').getInitParams();
 
-const PEREDICTION_CSV_PATH = `${config.paths.output_folder}/predictionSet.csv`;
+const PREDICTION_CSV_PATH = `${config.paths.output_folder}/predictionSet.csv`;
 const VALIDATION_CSV_PATH = `${config.paths.output_folder}/validationSet.csv`;
 
 module.exports = (app) => {
     app.post('/stsm/learning/data_and_validation_set_creation', (req, res) => {
-        const subjectIds = _.range(1, 23);
+        const subjectIds = _.range(1, config.subjects_count + 1);
         const validationSetIndexes = [];
         let i = 0;
 
         for (; i < config.validation_set_size; i++) {
-            const currSubjectId = _.random(1, 23);
-            const currWordId = _.random(1, 401);
+            const currSubjectId = _.random(1, config.subjects_count + 1);
+            const currWordId = _.random(1, config.words_per_subject + 1);
             const sampleKey = `${currSubjectId}%${currWordId}`;
-            if (!_.includes(validationSetIndexes, sampleKey)) {
+            if (validationSetIndexes.indexOf(sampleKey) === -1) {
                 validationSetIndexes.push(sampleKey);
             } else {
-                i--;
+                --i;
             }
         }
 
@@ -62,7 +62,7 @@ module.exports = (app) => {
                 };
 
                 return Promise.all([
-                    fs.writeFile(PEREDICTION_CSV_PATH, predictionCsv, errorHandler),
+                    fs.writeFile(PREDICTION_CSV_PATH, predictionCsv, errorHandler),
                     fs.writeFile(VALIDATION_CSV_PATH, validationCsv, errorHandler),
                 ]);
             })
