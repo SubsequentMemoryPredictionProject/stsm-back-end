@@ -2,7 +2,6 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 const formidable = require('formidable');
 const request = require('request-promise');
-const {config, logger} = require('./../index').getInitParams();
 
 const sampleIdNames = require('../enums/sampleIdNames');
 const featureArraysNames = require('../enums/featureArraysNames');
@@ -12,6 +11,8 @@ const csvUtils = require('../utils/csvUtils');
 const errorUtils = require('../utils/errorUtils');
 const databaseUtils = require('../utils/databaseUtils');
 const httpErrors = require('../errors/httpErrors');
+
+const {config, logger} = require('./../index').getInitParams();
 
 module.exports = (app) => {
     app.post('/stsm/prediction/uploadFiles', (req, res) => {
