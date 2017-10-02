@@ -21,7 +21,6 @@ process.on('exit', () => {
 
 (() => {
     logger = loggerUtils.createLogger(config.logger);
-
     return Promise.all([
         databaseUtils.init({config, logger}),
         userManagementLogic.init({config, logger}),
