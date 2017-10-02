@@ -12,7 +12,7 @@ const csvErrors = require('../errors/csvErrors');
 
 const {config, logger} = require('./../index').getInitParams();
 
-const PERDICTION_CSV_PATH = `${config.paths.output_folder}/predictionSet.csv`;
+const PEREDICTION_CSV_PATH = `${config.paths.output_folder}/predictionSet.csv`;
 const VALIDATION_CSV_PATH = `${config.paths.output_folder}/validationSet.csv`;
 
 module.exports = (app) => {
@@ -62,7 +62,7 @@ module.exports = (app) => {
                 };
 
                 return Promise.all([
-                    fs.writeFile(PERDICTION_CSV_PATH, predictionCsv, errorHandler),
+                    fs.writeFile(PEREDICTION_CSV_PATH, predictionCsv, errorHandler),
                     fs.writeFile(VALIDATION_CSV_PATH, validationCsv, errorHandler),
                 ]);
             })

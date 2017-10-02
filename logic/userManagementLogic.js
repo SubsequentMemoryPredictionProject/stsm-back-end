@@ -3,12 +3,6 @@ const _ = require('lodash');
 
 const databaseUtils = require('./../utils/databaseUtils');
 
-let logger;
-
-const init = (initParams) => {
-    logger = initParams.logger;
-};
-
 const createNewUser = (userName, password) => {
     const nowDate = moment().format('YYYY-MM-DD HH:mm:ss');
     const sqlQuery = `INSERT INTO users (user_name, password, created)
@@ -47,7 +41,6 @@ const authenticateUser = (userName, password) => {
 };
 
 module.exports = {
-    init,
     createNewUser,
     authenticateUser,
 };

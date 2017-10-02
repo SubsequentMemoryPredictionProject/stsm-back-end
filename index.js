@@ -5,7 +5,6 @@ const config = require('./config');
 const serverInfrastructure = require('./utils/serverInfraUtils');
 const loggerUtils = require('./utils/loggerUtils');
 const databaseUtils = require('./utils/databaseUtils');
-const userManagementLogic = require('./logic/userManagementLogic');
 const learningLogic = require('./logic/learningLogic');
 
 let logger;
@@ -23,7 +22,6 @@ process.on('exit', () => {
     logger = loggerUtils.createLogger(config.logger);
     return Promise.all([
         databaseUtils.init({config, logger}),
-        userManagementLogic.init({config, logger}),
         learningLogic.init({config, logger}),
     ]).then(() => {
         return serverInfrastructure.initServer({
