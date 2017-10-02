@@ -80,17 +80,33 @@ module.exports = (app) => {
                         return csvUtils.each(file.path, sampleHandler);
                     })
                         .then((parsedBody) => {
-                            // if (parsedBody.success === 'false') {
-                            //     // TODO handel error
-                            // }
-                            console.log(subjectsWords)
+                            if (parsedBody.success === 'false') {
+                                // TODO handel error
+                            }
                             const columnNames = _.values(predictionNames);
 
                             const queryAndPart = _.reduce(subjectsWords, (ANDString, wordArray, subjectId) => {
-                                console.log('subjectId', subjectId);
-                                console.log('wordArray', wordArray);
-
-                                return `${ANDString} (subject_id = subjectId, word_id in [${wordArray})] OR`;
+                                return `${ANDString} (subject_id = ${subjectId}
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                , word_id in [${wordArray})] OR`;
                             }, '');
 
                             const predictionQuery = `SELECT ${columnNames.toString()}
@@ -106,12 +122,8 @@ module.exports = (app) => {
                             res.sendFile(`${config.paths.output_folder}/results.csv`);
                         });
                 });
+            }).catch((err) => { // TODO
+                throw errorUtils.generate(httpErrors.predictionProcessFailure(err));
             });
-        // .then(() => {
-        //     then((resp) => {
-        //     }).catch((err) => { // TODO
-        //         throw errorUtils.generate(httpErrors.predictionProcessFailure(err));
-        //     });
-        // });
     });
 };

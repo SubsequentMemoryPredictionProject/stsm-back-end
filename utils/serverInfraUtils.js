@@ -42,7 +42,7 @@ const expressConfiguration = (app, serverName, logger) => {
                 oldEnd = res.end;
             const chunks = [];
 
-            // todo should be an arrow function?
+            // must be a function not arrow function due to the use of arguments keyword
             // override the write function to write in chunks
             res.write = function (chunk) { // eslint-disable-line no-param-reassign
                 chunks.push(chunk);

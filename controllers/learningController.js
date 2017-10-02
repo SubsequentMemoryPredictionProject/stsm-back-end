@@ -1,7 +1,6 @@
 const Promise = require('bluebird');
 const fs = require('fs');
 const _ = require('lodash');
-const {config, logger} = require('./../index').getInitParams();
 
 const learningLogic = require('../logic/learningLogic');
 const csvUtils = require('../utils/csvUtils');
@@ -9,24 +8,23 @@ const errorUtils = require('../utils/errorUtils');
 const predictionNames = require('../enums/predictionNames');
 const featureArraysNames = require('../enums/featureArraysNames');
 const sampleIdNames = require('../enums/sampleIdNames');
-
 const csvErrors = require('../errors/csvErrors');
 
-module.exports = (app) => {
-    /* on a post request to /stsm/create_data_set
-     // the server will extract a data set (training & testing)
-     // from the raw csv files.
-     // the EEG signal was pre-processed in advanced using Matlab
-     */
-    app.post('/stsm/learning/upload_data_set', (req, res) => {
-        const subjectIds = _.range(1, 23);
+const {config, logger} = require('./../index').getInitParams();
 
+const PERDICTION_CSV_PATH = `${config.paths.output_folder}/predictionSet.csv`;
+const VALIDATION_CSV_PATH = `${config.paths.output_folder}/validationSet.csv`;
+
+module.exports = (app) => {
+    app.post('/stsm/learning/data_and_validation_set_creation', (req, res) => {
+        const subjectIds = _.range(1, 23);
         const validationSetIndexes = [];
         let i = 0;
+
         for (; i < config.validation_set_size; i++) {
-            const subjectId = _.random(1, 23);
-            const wordId = _.random(1, 401);
-            const sampleKey = `${subjectId}%${wordId}`;
+            const currSubjectId = _.random(1, 23);
+            const currWordId = _.random(1, 401);
+            const sampleKey = `${currSubjectId}%${currWordId}`;
             if (!_.includes(validationSetIndexes, sampleKey)) {
                 validationSetIndexes.push(sampleKey);
             } else {
@@ -34,17 +32,22 @@ module.exports = (app) => {
             }
         }
 
-        logger.info(_.size(validationSetIndexes))
+        logger.info(`The validation set will include ${_.size(validationSetIndexes)} samples`);
 
         const validationData = [];
-        const subjectHandler = (subjectId) => learningLogic.uploadSubjectData(subjectId, validationSetIndexes, validationData);
+        const subjectHandler = (subjectId) => {
+            return learningLogic.uploadSubjectData(subjectId, validationSetIndexes, validationData);
+        };
 
-        return Promise.each(subjectIds, subjectHandler)
+        return learningLogic.truncateDataSet()
+            .then(() => Promise.each(subjectIds, subjectHandler))
             .then(() => {
-                logger.info('gal-1') // todo
+                logger.info('The data set was uploaded to the DB');
 
-                const predictionCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(featureArraysNames.electrodeColumnsNames);
-                const validationCsvFieldNames = (_.values(sampleIdNames).slice(1, 3)).concat(_.values(predictionNames), featureArraysNames.electrodeColumnsNames);
+                const relevantSampleIdNames = _.values(sampleIdNames).slice(1, 3);
+                const electrodeColumnsNames = featureArraysNames.electrodeColumnsNames;
+                const predictionCsvFieldNames = relevantSampleIdNames.concat(electrodeColumnsNames);
+                const validationCsvFieldNames = relevantSampleIdNames.concat(_.values(predictionNames), electrodeColumnsNames);
 
                 return Promise.all([
                     csvUtils.convertJsonToCsv(predictionCsvFieldNames, {items: validationData}),
@@ -52,31 +55,20 @@ module.exports = (app) => {
                 ]);
             })
             .then(([predictionCsv, validationCsv]) => {
-                const predictionPath = `${config.paths.output_folder}/predictionSet.csv`;
-                const validationPath = `${config.paths.output_folder}/validationSet.csv`;
-
-                logger.info('gal0') // todo
-
                 const errorHandler = (err) => {
                     if (err) {
-                        throw errorUtils.generate(csvErrors.failureInWriteFile(err));
+                        throw errorUtils.generate(csvErrors.writeCsvToFileFailure(err));
                     }
                 };
 
-                logger.info('gal1') // todo
-
                 return Promise.all([
-                    fs.writeFile(predictionPath, predictionCsv, errorHandler),
-                    fs.writeFile(validationPath, validationCsv, errorHandler),
+                    fs.writeFile(PERDICTION_CSV_PATH, predictionCsv, errorHandler),
+                    fs.writeFile(VALIDATION_CSV_PATH, validationCsv, errorHandler),
                 ]);
             })
             .then(() => {
-                console.log('gal2')
-                res.json({msg: 'The data set was loaded to the db', success: true});
-            })
-            .catch((err) => { // todo delete
-                logger.info(err);
-                throw (err);
+                logger.info('The validation set was created');
+                res.json({msg: 'Data and validation sets were created successfully', success: true});
             });
     });
 };

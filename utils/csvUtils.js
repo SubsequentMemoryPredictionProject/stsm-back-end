@@ -15,7 +15,7 @@ const convertJsonToCsv = (fields, {quotes = '"', items = [], hasColumnTitles = t
         };
 
         json2csv(json2csvOptions, (err, csv) => {
-            if (err) return reject(errors.reGenerate(err, csvErrors.failureInConvertingJsonToCsv(json2csvOptions)));
+            if (err) return reject(errors.reGenerate(err, csvErrors.converteJsonToCsvFailure(json2csvOptions)));
             resolve(csv);
         });
     });
@@ -24,7 +24,7 @@ const convertJsonToCsv = (fields, {quotes = '"', items = [], hasColumnTitles = t
 const writeToStream = (writeStream, csv, {encoding} = {}) => {
     return new Promise((resolve, reject) => {
         writeStream.write(csv + os.EOL, encoding, (err) => {
-            if (err) return reject(errors.reGenerate(err, csvErrors.failureInWritingToStream(writeStream, csv)));
+            if (err) return reject(errors.reGenerate(err, csvErrors.writeToStreamFailure(writeStream, csv)));
 
             resolve();
         });
@@ -43,6 +43,7 @@ const generateWriteHandler = (fields, writeStream, {quotes = '"', encoding} = {}
     };
 };
 
+// TODO needed?
 const initWrite = (fields, writeStream, {quotes = '"', items = [], encoding} = {}) => {
     return Promise.resolve()
         .then(() => {
@@ -72,7 +73,7 @@ const each = (filePath, itemHandler) => {
 };
 
 module.exports = {
-    initWrite,
     each,
     convertJsonToCsv,
+    initWrite,
 };

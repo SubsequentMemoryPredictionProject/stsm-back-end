@@ -1,11 +1,8 @@
 const userManagementLogic = require('../logic/userManagementLogic');
+
 const {logger} = require('./../index').getInitParams();
 
 module.exports = (app) => {
-    /* on a put request to /stsm/user_management/create_user
-     // with user and a password the server will create a user
-     // unless it already exists (in this case the response will state failure)
-     */
     app.put('/stsm/user_management/create_user', (req, res) => {
         const userName = req.query.user_name;
         const password = req.query.password;
@@ -14,23 +11,21 @@ module.exports = (app) => {
             .then(() => userManagementLogic.createNewUser(userName, password))
             .then((response) => {
                 if (response.success) {
-                    logger.info(`User ${userName} was created successfully`);
-                    res.json({msg: 'The user was created successfully', success: true});
+                    const successMsg = `User ${userName} was created successfully`;
+                    logger.info(successMsg);
+                    res.json({msg: successMsg, success: true});
                 } else if (response.reason) {
-                    logger.warn(`User ${userName} was not created due to ${response.reason}`);
-                    res.json({msg: response.reason, success: false});
+                    const failedMsg = `User ${userName} was not created due to ${response.reason}`;
+                    logger.warn(failedMsg);
+                    res.json({msg: failedMsg, success: false});
                 } else {
-                    logger.error(`User ${userName} was not created due to an unknown error`);
-                    res.json({msg: 'User creation failed due to an unknown reason', success: false});
+                    const unknownError = `User ${userName} was not created due to an unknown error`;
+                    logger.error(unknownError);
+                    res.json({msg: unknownError, success: false});
                 }
             });
     });
 
-    /* on a get request to /stsm/user_management/authenticate
-     // with user and a password
-     // the server will check on the db if the user exists and that it is indeed his password
-     // and will report back in its response,
-     */
     app.get('/stsm/user_management/authenticate', (req, res) => {
         const userName = req.query.user_name;
         const password = req.query.password;
@@ -39,14 +34,17 @@ module.exports = (app) => {
             .then(() => userManagementLogic.authenticateUser(userName, password))
             .then((response) => {
                 if (response.success) {
-                    logger.info(`User ${userName} was authenticated successfully`);
-                    res.json({msg: 'The user and password are valid', user_id: response.id, success: true});
+                    const successMsg = `User ${userName} was authenticated successfully`;
+                    logger.info(successMsg);
+                    res.json({msg: successMsg, user_id: response.id, success: true});
                 } else if (response.reason) {
-                    logger.warn(`User ${userName} was not authenticated due to ${response.reason}`);
-                    res.json({msg: response.reason, success: false});
+                    const failedMsg = `User ${userName} was not authenticated due to ${response.reason}`;
+                    logger.warn(failedMsg);
+                    res.json({msg: failedMsg, success: false});
                 } else {
-                    logger.error(`User ${userName} was not authenticated due to an unknown reason`);
-                    res.json({msg: 'User creation failed due to an unknown reason', success: false});
+                    const unknownError = `User ${userName} was not authenticated due to an unknown reason`;
+                    logger.error(unknownError);
+                    res.json({msg: unknownError, success: false});
                 }
             });
     });
