@@ -47,7 +47,7 @@ const expressConfiguration = (app, serverName, logger) => {
             res.write = function (chunk) { // eslint-disable-line no-param-reassign
                 chunks.push(chunk);
 
-                oldWrite.apply(res); // TODO (res, arguments);
+                oldWrite.apply(res, arguments);
             };
 
             // must be a function not arrow function due to the use of arguments keyword
@@ -67,7 +67,7 @@ const expressConfiguration = (app, serverName, logger) => {
 
                 logger.info('request finished!');
 
-                oldEnd.apply(res); // TODO (res, arguments);
+                oldEnd.apply(res, arguments);
             };
 
             next();

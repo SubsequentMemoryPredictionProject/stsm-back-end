@@ -35,7 +35,7 @@ module.exports = {
         port: 3100,
     },
     paths: {
-        output_folder: `${__dirname}/output/prediction`,
+        output_folder: `${__dirname}/output`,
         input_folder: `${__dirname}/input`,
     },
     validation_set_size: 1760,
