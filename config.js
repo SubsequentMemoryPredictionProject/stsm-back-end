@@ -30,10 +30,7 @@ module.exports = {
         port: 3306,
         database: 'STSMDB',
     },
-    algorithms_server: {
-        ip: '54.86.164.123',
-        port: 3100,
-    },
+    algorithms_server: '54.86.164.123/3100',
     paths: {
         output_folder: `${__dirname}/output`,
         input_folder: `${__dirname}/input`,
