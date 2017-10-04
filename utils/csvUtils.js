@@ -59,7 +59,7 @@ const initWrite = (fields, writeStream, {quotes = '"', items = [], encoding} = {
 
 const each = (filePath, itemHandler) => {
     return new Promise((resolve, reject) => {
-        fastCsv.fromPath(filePath, {ignoreEmpty: true})
+        fastCsv.fromPath(filePath, {ignoreEmpty: true, headers: true})
             .on('data', (item) => {
                 itemHandler(item);
             })

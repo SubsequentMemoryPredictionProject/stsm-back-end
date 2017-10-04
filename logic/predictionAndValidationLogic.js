@@ -1,8 +1,11 @@
 const _ = require('lodash');
+const formidable = require('formidable');
 
+const errorUtils = require('../utils/errorUtils');
 const databaseUtils = require('../utils/databaseUtils');
 const sampleIdNames = require('../enums/sampleIdNames');
 const featureArraysNames = require('../enums/featureArraysNames');
+const httpErrors = require('../errors/httpErrors');
 
 const sampleIdColumnNams = _.values(sampleIdNames).slice(1);
 const section1ElectrodeColumnsNames = featureArraysNames.section1ElectrodeColumnsNames;
@@ -12,6 +15,8 @@ const columnNamesForSection1 = ['EEG_data_section'].concat(_.values(sampleIdName
 const partialColumnNamesForSection1 = sampleIdColumnNams.concat(section1ElectrodeColumnsNames);
 const columnNamesForSection2 = ['EEG_data_section'].concat(_.values(sampleIdNames), section2ElectrodeColumnsNames);
 const partialColumnNamesForSection2 = sampleIdColumnNams.concat(section2ElectrodeColumnsNames);
+
+const {logger} = require('./../index').getInitParams();
 
 const fromFilesToFileArray = (files) => {
     const fileArray = _.reduce(files, (array, file, fileName) => {
@@ -39,7 +44,42 @@ const uploadSampleSectionToDB = (sample, eegDataSection, userId) => {
     return databaseUtils.executeQuery(query);
 };
 
+const fromHttpFormToFileArray = (req) => {
+    return new Promise((resolve) => {
+        const form = new formidable.IncomingForm();
+        logger.info('Parsing the received http form');
+        form.parse(req, (err, fields, files) => {
+            if (err) {
+                throw errorUtils.generate(httpErrors.formParsingFailure(err));
+            }
+            const fileArray = fromFilesToFileArray(files);
+            resolve(fileArray);
+        });
+    });
+};
+
+const createSampleHandler = (sampleUploader, userId, samplesIds) => {
+    const sampleHandler = (sample) => {
+        console.log(sample)
+        const subjectId = sample[0];
+        const wordId = sample[1];
+
+        if (_.isUndefined(samplesIds[subjectId])) {
+            samplesIds[subjectId] = []; // eslint-disable-line no-param-reassign
+        }
+        samplesIds[subjectId].push(wordId);
+
+        return Promise.all([
+            sampleUploader(sample, 1, userId),
+            sampleUploader(sample, 2, userId),
+        ]);
+    };
+
+    return sampleHandler;
+};
+
 module.exports = {
-    fromFilesToFileArray,
+    createSampleHandler,
     uploadSampleSectionToDB,
+    fromHttpFormToFileArray,
 };

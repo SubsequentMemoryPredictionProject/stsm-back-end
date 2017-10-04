@@ -65,7 +65,7 @@ const expressConfiguration = (app, serverName, logger) => {
                 req.context.status = res.statusCode; // eslint-disable-line no-param-reassign
                 req.context.rt = (new Date() - req.startTime); // eslint-disable-line no-param-reassign
 
-                logger.info('request finished!');
+                logger.info('request finished!', req.context);
 
                 oldEnd.apply(res, arguments);
             };
