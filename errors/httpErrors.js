@@ -7,13 +7,13 @@ module.exports = {
     },
     algorithmsServerConnectionFailure: () => {
         return {
-            message: `Sending a prediction request to the algorithms server failed`,
+            message: 'Sending a prediction request to the algorithms server failed',
             errorCode: 3001,
         };
     },
     algorithmsServerPredictionFailure: () => {
         return {
-            message: `Prediction process by the algorithms server failed`,
+            message: 'Prediction process by the algorithms server failed',
             errorCode: 3002,
         };
     },
