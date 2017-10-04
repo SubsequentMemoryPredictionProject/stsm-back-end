@@ -60,7 +60,6 @@ const fromHttpFormToFileArray = (req) => {
 
 const createSampleHandler = (sampleUploader, userId, samplesIds) => {
     const sampleHandler = (sample) => {
-        console.log(sample)
         const subjectId = sample[0];
         const wordId = sample[1];
 
