@@ -39,7 +39,6 @@ const executeQuery = (query) => {
             if (error) {
                 reject(errorUtils.generate(errors.dbQueryFailure(error)));
             }
-            logger.info('results', results) // TODO
             resolve(results);
         });
     });
