@@ -61,7 +61,7 @@ const each = (filePath, itemHandler) => {
     return new Promise((resolve, reject) => {
         fastCsv.fromPath(filePath, {ignoreEmpty: true})
             .on('data', (item) => {
-                itemHandler(item);
+                return itemHandler(item); // TODO return?
             })
             .on('end', () => {
                 return resolve();
