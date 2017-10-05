@@ -60,11 +60,12 @@ module.exports = (app) => {
 
                 const sqlQuery = 'select count(*) from user_data';
 
-                return databaseUtils.executeQuery(sqlQuery)
+                return databaseUtils.executeQuery(sqlQuery);
 
                 // return request(requestOptions);
             })
             .then((predictionsResponse) => {
+                console.log('sql res', predictionsResponse)
                 logger.info(`Algorithms server response was: ${predictionsResponse.msg}`);
 
                 if (!predictionsResponse.success) {
