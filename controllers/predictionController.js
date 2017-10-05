@@ -50,6 +50,7 @@ module.exports = (app) => {
                     subjects_and_word_ids: subjectsAndWordIdsForPrediction,
                 };
 
+
                 const requestOptions = {
                     method: 'POST',
                     body: requestBody,
@@ -57,7 +58,11 @@ module.exports = (app) => {
                     json: true, //Automatically stringifies the body to JSON
                 };
 
-                return request(requestOptions);
+                const sqlQuery = 'select count(*) from user_data';
+
+                return databaseUtils.executeQuery(sqlQuery)
+
+                // return request(requestOptions);
             })
             .then((predictionsResponse) => {
                 logger.info(`Algorithms server response was: ${predictionsResponse.msg}`);
