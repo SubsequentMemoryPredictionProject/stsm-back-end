@@ -11,9 +11,9 @@ module.exports = {
             errorCode: 3001,
         };
     },
-    algorithmsServerPredictionFailure: () => {
+    algorithmsServerPredictionFailure: (msg) => {
         return {
-            message: 'Prediction process by the algorithms server failed',
+            message: `Prediction process by the algorithms server failed: ${msg}`,
             errorCode: 3002,
         };
     },

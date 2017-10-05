@@ -24,9 +24,11 @@ const init = (initParams) => {
 const exitHandler = () => {
     logger.info('Closing the database connection gracefully');
 
-    return connection.end((err) => {
-        throw errorUtils.generate(errors.dbConnectionTerminationFailure(err));
-    });
+    if (connection) {
+        return connection.end((err) => {
+            throw errorUtils.generate(errors.dbConnectionTerminationFailure(err));
+        });
+    }
 };
 
 const executeQuery = (query) => {

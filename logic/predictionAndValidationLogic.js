@@ -60,8 +60,12 @@ const fromHttpFormToFileArray = (req) => {
 
 const createSampleHandler = (sampleUploader, userId, samplesIds) => {
     const sampleHandler = (sample) => {
-        const subjectId = sample[0];
-        const wordId = sample[1];
+        const subjectId = parseInt(sample[0], 10);
+        const wordId = parseInt(sample[1], 10);
+
+        if (!subjectId || !wordId) {
+            return;
+        }
 
         if (_.isUndefined(samplesIds[subjectId])) {
             samplesIds[subjectId] = []; // eslint-disable-line no-param-reassign

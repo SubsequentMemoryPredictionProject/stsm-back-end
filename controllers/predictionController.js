@@ -7,9 +7,10 @@ const predictionLogic = require('../logic/predictionAndValidationLogic');
 const csvUtils = require('../utils/csvUtils');
 const errorUtils = require('../utils/errorUtils');
 const databaseUtils = require('../utils/databaseUtils');
-const csvErrors = require('../errors/csvErrors');
 const predictionNames = require('../enums/predictionNames');
 const sampleIdNames = require('../enums/sampleIdNames');
+const csvErrors = require('../errors/csvErrors');
+const httpErrors = require('../errors/httpErrors');
 
 const {config, logger} = require('./../index').getInitParams();
 
@@ -20,6 +21,7 @@ module.exports = (app) => {
         const userId = req.query.user_id;
 
         if (!userId) {
+            logger.error('no id');
             // TODO handel
         }
 
@@ -43,7 +45,10 @@ module.exports = (app) => {
                 logger.info('Sending prediction request to the algorithms server');
 
                 const url = `http://${config.algorithms_server}/stsm/algorithms/predict`;
-                const requestBody = {subjects_and_word_ids: subjectsAndWordIdsForPrediction};
+                const requestBody = {
+                    user_id: userId,
+                    subjects_and_word_ids: subjectsAndWordIdsForPrediction,
+                };
 
                 const requestOptions = {
                     method: 'POST',
@@ -56,6 +61,10 @@ module.exports = (app) => {
             })
             .then((predictionsResponse) => {
                 logger.info(`Algorithms server response was: ${predictionsResponse.msg}`);
+
+                if (!predictionsResponse.success) {
+                    throw errorUtils.generate(httpErrors.algorithmsServerPredictionFailure(err.msg));
+                }
 
                 const subjectHandler = (queryANDString, subjectWords, subjectId) => {
                     return `${queryANDString} (subject_id = ${subjectId} AND word_id in (${subjectWords})) OR `;
@@ -80,9 +89,12 @@ module.exports = (app) => {
                 return fs.writeFile(RESULTS_CSV_PATH, resultsCsv, errorHandler);
             })
             .then(() => {
-                logger.info('Sending the results.csv file to the user');
+                logger.info('Sending the results csv file to the user');
                 res.sendFile(RESULTS_CSV_PATH);
             })
-            .catch(console.log);
+            .catch((err) => {
+                // todo
+                logger.error(`Prediction process failed: ${err.message}`);
+            });
     });
 };

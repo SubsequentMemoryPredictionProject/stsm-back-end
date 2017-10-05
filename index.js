@@ -31,6 +31,8 @@ process.on('exit', () => {
             timeToLeaveLoadBalancer: 1000 * 20,
             logger,
         });
+    }).catch((err) => {
+        console.log(`Error: STSM server initialization failed: ${err.message}`);
     });
 })();
 
