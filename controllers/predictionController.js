@@ -97,7 +97,7 @@ module.exports = (app) => {
             .then(() => {
                 logger.info('Sending the results file to the user');
                 logger.info(RESULTS_CSV_PATH); //TODO
-                res.sendFile(RESULTS_CSV_PATH);
+                res.sendFile('/predictionResults.csv');
             })
             .catch((err) => {
                 // todo
