@@ -65,7 +65,7 @@ module.exports = (app) => {
                 // return request(requestOptions);
             })
             .then((predictionsResponse) => {
-                console.log('sql res', predictionsResponse)
+                logger.info('sql res', predictionsResponse) // TODO
                 logger.info(`Algorithms server response was: ${predictionsResponse.msg}`);
 
                 if (!predictionsResponse.success) {
