@@ -95,7 +95,8 @@ module.exports = (app) => {
                 return fs.writeFile(RESULTS_CSV_PATH, resultsCsv, errorHandler);
             })
             .then(() => {
-                logger.info('Sending the results csv file to the user');
+                logger.info('Sending the results file to the user');
+                logger.info(RESULTS_CSV_PATH); //TODO
                 res.sendFile(RESULTS_CSV_PATH);
             })
             .catch((err) => {
