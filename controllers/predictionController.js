@@ -17,7 +17,7 @@ const {config, logger} = require('./../index').getInitParams();
 const RESULTS_CSV_PATH = `${config.paths.output_folder}/predictionResults.csv`;
 
 module.exports = (app) => {
-    app.get('/stsm/predict', (req, res) => {
+    app.put('/stsm/predict', (req, res) => {
         const userId = req.query.user_id;
 
         if (!userId) {
