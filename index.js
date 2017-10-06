@@ -32,7 +32,7 @@ process.on('exit', () => {
             logger,
         });
     }).catch((err) => {
-        console.log(`Error: STSM server initialization failed: ${err.message}`);
+        console.log(`Error: STSM server initialization failed: ${err.message}`); // eslint-disable-line no-console
     });
 })();
 

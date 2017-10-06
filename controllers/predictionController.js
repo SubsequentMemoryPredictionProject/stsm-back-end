@@ -17,10 +17,7 @@ const {config, logger} = require('./../index').getInitParams();
 const RESULTS_CSV_PATH = `${config.paths.output_folder}/predictionResults.csv`;
 
 module.exports = (app) => {
-    app.get('/stsm/predict', (req, res) => {
-        res.sendFile(RESULTS_CSV_PATH);
-        return;
-
+    app.post('/stsm/prediction/start_prediction_process', (req, res) => {
         const userId = req.query.user_id;
 
         if (!userId) {
@@ -43,13 +40,7 @@ module.exports = (app) => {
                     return csvUtils.each(file.path, sampleHandler);
                 });
             })
-            .then(() => { // TODO
-                const sqlQuery = 'select count(*) from user_data';
-                return databaseUtils.executeQuery(sqlQuery);
-            })
-            .then((sqlResponse) => {
-                logger.info('sql res', sqlResponse);
-
+            .then(() => {
                 logger.info('All of the user\'s data was uploaded to the DB');
                 logger.info('Sending prediction request to the algorithms server');
 
@@ -72,7 +63,7 @@ module.exports = (app) => {
                 logger.info(`Algorithms server response was: ${predictionsResponse.msg}`);
 
                 if (!predictionsResponse.success) {
-                    throw errorUtils.generate(httpErrors.algorithmsServerPredictionFailure(err.msg));
+                    throw errorUtils.generate(httpErrors.algorithmsServerPredictionFailure(predictionsResponse.msg));
                 }
 
                 const subjectHandler = (queryANDString, subjectWords, subjectId) => {
@@ -97,11 +88,22 @@ module.exports = (app) => {
 
                 return fs.writeFile(RESULTS_CSV_PATH, resultsCsv, errorHandler);
             })
-            .then(() => {
-                logger.info('Sending the results file to the user');
-                logger.info(RESULTS_CSV_PATH);
-                res.sendFile(RESULTS_CSV_PATH);
-            })
+            .catch((err) => {
+                // todo
+                logger.error(`Prediction process failed: ${err.message}`);
+            });
+    });
+
+    app.get('/stsm/prediction/get_prediction_response', (req, res) => {
+        const userId = req.query.user_id;
+
+        if (!userId) {
+            logger.error('no id');
+            // TODO handel
+        }
+        logger.info('Sending the results file to the user');
+
+        return res.sendFile(RESULTS_CSV_PATH)
             .catch((err) => {
                 // todo
                 logger.error(`Prediction process failed: ${err.message}`);
