@@ -1,6 +1,7 @@
 const os = require('os'); // to get the os's EOL char
 const json2csv = require('json2csv');
 const fastCsv = require('fast-csv');
+const Promise = require('bluebird');
 
 const errors = require('../utils/errorUtils');
 const csvErrors = require('../errors/csvErrors');
@@ -58,13 +59,15 @@ const initWrite = (fields, writeStream, {quotes = '"', items = [], encoding} = {
 };
 
 const each = (filePath, itemHandler) => {
+    const rowInsertionPromises = [];
+
     return new Promise((resolve, reject) => {
         fastCsv.fromPath(filePath, {ignoreEmpty: true})
             .on('data', (item) => {
-                return itemHandler(item);
+                rowInsertionPromises.push(itemHandler(item));
             })
             .on('end', () => {
-                return resolve();
+                return resolve(Promise.all(rowInsertionPromises));
             })
             .on('error', (err) => {
                 return reject(err);
