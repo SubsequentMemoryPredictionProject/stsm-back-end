@@ -104,5 +104,5 @@ const uploadReceivedFilesToTheDB = (req, userId, sampleUploader, subjectsAndWord
 module.exports = {
     uploadReceivedFilesToTheDB,
     uploadPredictionSampleSectionToDB,
-    uploadValidationSampleSectionToDB,
+    // uploadValidationSampleSectionToDB,
 };
