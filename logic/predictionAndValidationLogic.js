@@ -41,8 +41,6 @@ const uploadPredictionSampleSectionToDB = (sample, eegDataSection, userId) => {
     const fixedValuesString = valuesString.slice(0, _.size(valuesString) - 2);
 
     const query = `INSERT INTO user_data (${columnNames.toString()})
-                    VALUES (${fixedValuesString})
-                    ON DUPLICATE KEY UPDATE (${columnNames.toString()})
                     VALUES (${fixedValuesString})`;
 
     return databaseUtils.executeQuery(query);
