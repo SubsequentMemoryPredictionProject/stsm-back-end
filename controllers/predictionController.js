@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const Promise = require('bluebird');
 const request = require('request-promise');
 const fs = require('fs');
 
@@ -14,51 +13,41 @@ const httpErrors = require('../errors/httpErrors');
 
 const {config, logger} = require('./../index').getInitParams();
 
-const RESULTS_CSV_PATH = `${config.paths.output_folder}/predictionResults.csv`;
-
 module.exports = (app) => {
     app.post('/stsm/prediction/start_prediction_process', (req, res) => {
         const userId = req.query.user_id;
-
         if (!userId) {
-            logger.error('no id');
-            // TODO handel
+            logger.info('The prediction request failed since it does not contain a user id');
+            res.json({msg: 'User id is missing', success: false});
+            return;
         }
 
         const subjectsAndWordIdsForPrediction = {};
 
-        return predictionLogic.fromHttpFormToFileArray(req)
-            .then((fileArray) => {
-                const sampleHandler = predictionLogic.createSampleHandler(
-                    predictionLogic.uploadSampleSectionToDB,
-                    userId,
-                    subjectsAndWordIdsForPrediction
-                );
+        return predictionLogic.uploadReceivedFilesToTheDB(
+            req,
+            userId,
+            predictionLogic.uploadPredictionSampleSectionToDB,
+            subjectsAndWordIdsForPrediction
+        ).then(() => {
+            logger.info('All of the user\'s data was uploaded to the DB');
+            logger.info('Sending prediction request to the algorithms server');
 
-                return Promise.each(fileArray, (file) => {
-                    logger.info(`A file named ${file.name} was uploaded by user id ${userId}`);
-                    return csvUtils.each(file.path, sampleHandler);
-                });
-            })
-            .then(() => {
-                logger.info('All of the user\'s data was uploaded to the DB');
-                logger.info('Sending prediction request to the algorithms server');
+            const algorithmsPredictionUrl = `http://${config.algorithms_server}/stsm/algorithms/predict`;
+            const requestBody = {
+                user_id: userId,
+                subjects_and_word_ids: subjectsAndWordIdsForPrediction,
+            };
 
-                const url = `http://${config.algorithms_server}/stsm/algorithms/predict`;
-                const requestBody = {
-                    user_id: userId,
-                    subjects_and_word_ids: subjectsAndWordIdsForPrediction,
-                };
+            const requestOptions = {
+                method: 'POST',
+                body: requestBody,
+                url: algorithmsPredictionUrl,
+                json: true, //Automatically stringifies the body to JSON
+            };
 
-                const requestOptions = {
-                    method: 'POST',
-                    body: requestBody,
-                    url,
-                    json: true, //Automatically stringifies the body to JSON
-                };
-
-                return request(requestOptions);
-            })
+            return request(requestOptions);
+        })
             .then((predictionsResponse) => {
                 logger.info(`Algorithms server response was: ${predictionsResponse.msg}`);
 
@@ -66,47 +55,53 @@ module.exports = (app) => {
                     throw errorUtils.generate(httpErrors.algorithmsServerPredictionFailure(predictionsResponse.msg));
                 }
 
-                const subjectHandler = (queryANDString, subjectWords, subjectId) => {
+                const addSubjectToQuery = (queryANDString, subjectWords, subjectId) => {
                     return `${queryANDString} (subject_id = ${subjectId} AND word_id in (${subjectWords})) OR `;
                 };
-                const queryANDPart = _.reduce(subjectsAndWordIdsForPrediction, subjectHandler, '');
+                const queryANDPart = _.reduce(subjectsAndWordIdsForPrediction, addSubjectToQuery, '');
+
                 const predictionQuery = `SELECT * FROM untagged_predictions WHERE user_id=${userId} AND ${queryANDPart.slice(0, -3)}`;
                 return databaseUtils.executeQuery(predictionQuery);
             })
             .then((sqlResponse) => {
-                const resultsCsvFiledNames = _.values(sampleIdNames).slice(1).concat(_.values(predictionNames));
+                const releventSampleIdNamedForCsv = _.values(sampleIdNames).slice(1);
+                const resultsCsvFiledNames = releventSampleIdNamedForCsv.concat(_.values(predictionNames));
+
                 logger.info('Creating a csv file with the predictions');
                 return csvUtils.convertJsonToCsv(resultsCsvFiledNames, {items: sqlResponse});
             })
             .then((resultsCsv) => {
-                // TODO here
                 const errorHandler = (err) => {
                     if (err) {
                         throw errorUtils.generate(csvErrors.writeCsvToFileFailure(err));
                     }
                 };
 
-                return fs.writeFile(RESULTS_CSV_PATH, resultsCsv, errorHandler);
+                const resultsCsvPath = `${config.paths.output_folder}/user${userId}PredictionResults.csv`;
+                return fs.writeFile(resultsCsvPath, resultsCsv, errorHandler);
+            })
+            .then(() => {
+                logger.info('The prediction process was successfully over, the results csv is ready');
+                res.json({msg: 'The prediction process was successfully over!', success: true});
             })
             .catch((err) => {
-                // todo
-                logger.error(`Prediction process failed: ${err.message}`);
+                const errorMeg = `Prediction process failed: ${err.message}`;
+                res.json({msg: errorMeg, success: false});
+                throw errorUtils.generate({message: errorMeg});
             });
     });
 
     app.get('/stsm/prediction/get_prediction_response', (req, res) => {
         const userId = req.query.user_id;
-
         if (!userId) {
-            logger.error('no id');
-            // TODO handel
+            logger.info('The prediction request failed since it does not contain a user id');
+            res.json({msg: 'User id is missing', success: false});
+            return;
         }
+
         logger.info('Sending the results file to the user');
 
-        return res.sendFile(RESULTS_CSV_PATH)
-            .catch((err) => {
-                // todo
-                logger.error(`Prediction process failed: ${err.message}`);
-            });
+        const resultsCsvPath = `${config.paths.output_folder}/user${userId}PredictionResults.csv`;
+        return res.sendFile(resultsCsvPath);
     });
 };

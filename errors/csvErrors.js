@@ -1,5 +1,5 @@
 module.exports = {
-    converteJsonToCsvFailure: (json2csvOptions) => {
+    convertJsonToCsvFailure: (json2csvOptions) => {
         return {message: `Converting JSON to csv failed: ${json2csvOptions}`, code: 1000};
     },
     writeToStreamFailure: (stream, content) => {

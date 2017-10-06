@@ -1,7 +1,9 @@
 const _ = require('lodash');
 const formidable = require('formidable');
+const Promise = require('bluebird');
 
 const errorUtils = require('../utils/errorUtils');
+const csvUtils = require('../utils/csvUtils');
 const databaseUtils = require('../utils/databaseUtils');
 const sampleIdNames = require('../enums/sampleIdNames');
 const featureArraysNames = require('../enums/featureArraysNames');
@@ -28,7 +30,7 @@ const fromFilesToFileArray = (files) => {
     return fileArray;
 };
 
-const uploadSampleSectionToDB = (sample, eegDataSection, userId) => {
+const uploadPredictionSampleSectionToDB = (sample, eegDataSection, userId) => {
     const columnNames = eegDataSection === 1 ? columnNamesForSection1 : columnNamesForSection2;
     const partialColumnNames = eegDataSection === 2 ? partialColumnNamesForSection1 : partialColumnNamesForSection2;
     const valuesString = _.reduce(partialColumnNames, (values, columnName, columnIndex) => {
@@ -81,8 +83,23 @@ const createSampleHandler = (sampleUploader, userId, samplesIds) => {
     return sampleHandler;
 };
 
+const uploadReceivedFilesToTheDB = (req, userId, sampleUploader, subjectsAndWordIdsAgg) => {
+    return fromHttpFormToFileArray(req)
+        .then((fileArray) => {
+            const sampleHandler = createSampleHandler(
+                sampleUploader,
+                userId,
+                subjectsAndWordIdsAgg
+            );
+
+            return Promise.each(fileArray, (file) => {
+                logger.info(`A file named ${file.name} was uploaded by user id ${userId}`);
+                return csvUtils.each(file.path, sampleHandler);
+            });
+        });
+};
+
 module.exports = {
-    createSampleHandler,
-    uploadSampleSectionToDB,
-    fromHttpFormToFileArray,
+    uploadReceivedFilesToTheDB,
+    uploadPredictionSampleSectionToDB,
 };
