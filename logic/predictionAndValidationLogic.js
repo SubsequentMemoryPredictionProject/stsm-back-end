@@ -37,10 +37,12 @@ const uploadPredictionSampleSectionToDB = (sample, eegDataSection, userId) => {
         const currIndex = eegDataSection === 2 && columnIndex > 2 ? columnIndex + 6 : columnIndex;
         const currValuesString = values.concat(`'${sample[currIndex]}', `);
         return currValuesString;
-    }, `'${eegDataSection}', '${userId}', `); // subject_id, user_id, word_id
+    }, `'${eegDataSection}', '${userId}', `);
     const fixedValuesString = valuesString.slice(0, _.size(valuesString) - 2);
 
     const query = `INSERT INTO user_data (${columnNames.toString()})
+                    VALUES (${fixedValuesString})
+                    ON DUPLICATE KEY UPDATE (${columnNames.toString()})
                     VALUES (${fixedValuesString})`;
 
     return databaseUtils.executeQuery(query);
@@ -102,4 +104,5 @@ const uploadReceivedFilesToTheDB = (req, userId, sampleUploader, subjectsAndWord
 module.exports = {
     uploadReceivedFilesToTheDB,
     uploadPredictionSampleSectionToDB,
+    uploadValidationSampleSectionToDB,
 };

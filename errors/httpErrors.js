@@ -5,15 +5,15 @@ module.exports = {
             errorCode: 3000,
         };
     },
-    algorithmsServerConnectionFailure: () => {
-        return {
-            message: 'Sending a prediction request to the algorithms server failed',
-            errorCode: 3001,
-        };
-    },
     algorithmsServerPredictionFailure: (msg) => {
         return {
             message: `Prediction process by the algorithms server failed: ${msg}`,
+            errorCode: 3001,
+        };
+    },
+    algorithmsServerValidationFailure: (msg) => {
+        return {
+            message: `Validation process by the algorithms server failed: ${msg}`,
             errorCode: 3002,
         };
     },

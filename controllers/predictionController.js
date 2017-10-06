@@ -91,7 +91,7 @@ module.exports = (app) => {
             });
     });
 
-    app.get('/stsm/prediction/get_prediction_response', (req, res) => {
+    app.get('/stsm/prediction/get_predictions', (req, res) => {
         const userId = req.query.user_id;
         if (!userId) {
             logger.info('The prediction request failed since it does not contain a user id');
