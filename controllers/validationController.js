@@ -64,7 +64,7 @@ module.exports = (app) => {
             });
     });
 
-    app.get('/stsm/prediction/get_validation_scores', (req, res) => {
+    app.get('/stsm/validation/get_validation_scores', (req, res) => {
         const userId = req.query.user_id;
         if (!userId) {
             logger.info('The validation request failed since it does not contain a user id');
