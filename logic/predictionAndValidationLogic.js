@@ -60,8 +60,8 @@ const createSampleHandler = (sampleUploader, userId, samplesIds) => {
 };
 
 const deleteExistingSampleFromUserData = (sample, userId) => {
-    const deletionQuery = `DELETE from user_data 
-        where user_id = ${userId} AND subject_id = ${sample[0]} AND word_id = ${sample[1]}`;
+    const deletionQuery =
+        `DELETE from user_data where user_id = ${userId} AND subject_id = ${sample[0]} AND word_id = ${sample[1]}`;
 
     return databaseUtils.executeQuery(deletionQuery);
 };
