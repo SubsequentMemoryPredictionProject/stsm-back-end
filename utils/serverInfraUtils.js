@@ -44,14 +44,14 @@ const expressConfiguration = (app, serverName, logger) => {
 
             // must be a function not arrow function due to the use of arguments keyword
             // override the write function to write in chunks
-            res.write = function (chunk) { // eslint-disable-line no-param-reassign
+            res.write = function (chunk) { // eslint-disable-line no-param-reassign, func-names
                 chunks.push(chunk);
 
-                oldWrite.apply(res, arguments);
+                oldWrite.apply(res);
             };
 
             // must be a function not arrow function due to the use of arguments keyword
-            res.end = function (chunk) {  // eslint-disable-line no-param-reassign
+            res.end = function (chunk) {  // eslint-disable-line no-param-reassign, func-names
                 if (chunk) {
                     chunks.push(new Buffer(chunk));
                 }
@@ -67,7 +67,7 @@ const expressConfiguration = (app, serverName, logger) => {
 
                 logger.info('request finished!', req.context);
 
-                oldEnd.apply(res, arguments);
+                oldEnd.apply(res);
             };
 
             next();
