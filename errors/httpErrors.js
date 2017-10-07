@@ -17,4 +17,10 @@ module.exports = {
             errorCode: 3002,
         };
     },
+    serverInitializationFailed: (msg) => {
+        return {
+            message: `STSM server initialization failed: ${msg}`,
+            errorCode: 3003,
+        };
+    },
 };

@@ -5,6 +5,8 @@ const config = require('./config');
 const serverInfrastructure = require('./utils/serverInfraUtils');
 const loggerUtils = require('./utils/loggerUtils');
 const databaseUtils = require('./utils/databaseUtils');
+const errorUtils = require('./utils/errorUtils');
+const httpErrors = require('./errors/httpErrors');
 const learningLogic = require('./logic/learningLogic');
 
 let logger;
@@ -32,7 +34,7 @@ process.on('exit', () => {
             logger,
         });
     }).catch((err) => {
-        console.log(`Error: STSM server initialization failed: ${err.message}`); // eslint-disable-line no-console
+        throw errorUtils.generate(httpErrors.serverInitializationFailed(err.message));
     });
 })();
 

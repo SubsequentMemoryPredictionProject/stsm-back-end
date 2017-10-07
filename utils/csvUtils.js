@@ -44,7 +44,6 @@ const generateWriteHandler = (fields, writeStream, {quotes = '"', encoding} = {}
     };
 };
 
-// TODO needed?
 const initWrite = (fields, writeStream, {quotes = '"', items = [], encoding} = {}) => {
     return Promise.resolve()
         .then(() => {

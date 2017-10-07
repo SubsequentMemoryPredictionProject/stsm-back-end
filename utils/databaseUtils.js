@@ -33,7 +33,7 @@ const exitHandler = () => {
 
 const executeQuery = (query) => {
     return new Promise((resolve, reject) => {
-        logger.info(`Performing sql query: ${query.substring(0, 125)}`);
+        logger.info(`Performing sql query: ${query.substring(0, 110)}...`);
 
         connection.query(query, (error, results) => {
             if (error) {
