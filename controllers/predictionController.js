@@ -85,7 +85,7 @@ module.exports = (app) => {
                 res.json({msg: 'The prediction process was successfully over!', success: true});
             })
             .catch((err) => {
-                const errorMeg = `Prediction process failed: ${err.message}`;
+                const errorMeg = `Prediction process failed: ${err.message}`; // TODO
                 res.json({msg: errorMeg, success: false});
                 throw errorUtils.generate({message: errorMeg});
             });
