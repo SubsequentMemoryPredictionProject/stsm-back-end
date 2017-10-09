@@ -16,7 +16,7 @@ const PREDICTION_CSV_PATH = `${config.paths.output_folder}/predictionSet.csv`;
 const VALIDATION_CSV_PATH = `${config.paths.output_folder}/validationSet.csv`;
 
 module.exports = (app) => {
-    app.post('/stsm/learning/data_and_validation_set_creation', (req, res) => {
+    app.post('/stsm/learning/training_and_validation_set_creation', (req, res) => {
         const subjectIds = _.range(1, config.subjects_count + 1);
         const validationSetIndexes = [];
         let i = 0;
@@ -42,7 +42,7 @@ module.exports = (app) => {
         return learningLogic.truncateDataSet()
             .then(() => Promise.each(subjectIds, subjectHandler))
             .then(() => {
-                logger.info('The data set was uploaded to the DB');
+                logger.info('The training set was uploaded to the DB');
 
                 const relevantSampleIdNames = _.values(sampleIdNames).slice(1, 3);
                 const electrodeColumnsNames = featureArraysNames.electrodeColumnsNames;
@@ -68,7 +68,7 @@ module.exports = (app) => {
             })
             .then(() => {
                 logger.info('The validation set was created');
-                res.json({msg: 'Data and validation sets were created successfully', success: true});
+                res.json({msg: 'Training and validation sets were created successfully', success: true});
             });
     });
 };

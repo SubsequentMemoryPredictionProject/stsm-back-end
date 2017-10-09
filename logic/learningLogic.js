@@ -36,7 +36,7 @@ const getSubjectDataFromRawData = (subjectId) => {
             });
         })
         .then(() => {
-            logger.info(`finished loading confidence data for subject #${subjectId}`);
+            logger.info(`Finished loading confidence data for subject #${subjectId}`);
 
             const oldNewFile = `${config.paths.input_folder}/raw_data/OldNew_S${subjectId}.csv`;
             let wordId = 1;
@@ -47,7 +47,7 @@ const getSubjectDataFromRawData = (subjectId) => {
             });
         })
         .then(() => {
-            logger.info(`finished loading old/new data for subject #${subjectId}`);
+            logger.info(`Finished loading old/new data for subject #${subjectId}`);
 
             const rkFile = `${config.paths.input_folder}/raw_data/RK_S${subjectId}.csv`;
             let wordId = 1;
@@ -67,7 +67,7 @@ const getSubjectDataFromRawData = (subjectId) => {
             });
         })
         .then(() => {
-            logger.info(`finished loading remember/know data for subject #${subjectId}`);
+            logger.info(`Finished loading remember/know data for subject #${subjectId}`);
 
             return Promise.each(electrodeIds, (elecId) => {
                 return Promise.each(subElectrodeIds, (subElecId) => {
@@ -82,7 +82,7 @@ const getSubjectDataFromRawData = (subjectId) => {
             });
         })
         .then(() => {
-            logger.info(`finished loading EEG data for subject #${subjectId}`);
+            logger.info(`Finished loading EEG data for subject #${subjectId}`);
 
             return subjectData;
         });
