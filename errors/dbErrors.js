@@ -8,14 +8,13 @@ module.exports = {
     dbConnectionTerminationFailure: (err) => {
         return {
             message: `DB disconnection attempt failed ${err}`,
-            errorNumber: 2001,
+            errorCode: 2001,
         };
     },
     dbQueryFailure: (err) => {
         return {
             message: `DB query attempt failed ${err}`,
-            errorCode: err.code,
-            errorNumber: 2002,
+            errorCode: 2002,
         };
     },
 };
